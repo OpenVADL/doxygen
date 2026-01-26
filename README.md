@@ -1,68 +1,80 @@
-Doxygen
+Doxygen (OpenVADL Fork)
 ===============
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9HHLRBCC8B2B8)
 
-Doxygen is the de facto standard tool for generating documentation from
-annotated C++ sources, but it also supports other popular programming
-languages such as C, Objective-C, C#, PHP, Java, Python, IDL
-(Corba, Microsoft, and UNO/OpenOffice flavors), Fortran,
-and to some extent D. Doxygen also supports the hardware description language VHDL.
+This repository is a **custom fork of Doxygen** with added support for the **Coco/R ATG language**.
 
-Doxygen can help you in three ways:
+The fork is maintained for **internal documentation generation**.  
+It intentionally diverges from upstream and is **not intended to be merged back**.
 
-1. It can generate an online documentation browser (in HTML) and/or an
-   offline reference manual (in LaTeX) from a set of documented source files.
-   There is also support for generating output in RTF (MS-Word), PostScript,
-   hyperlinked PDF, compressed HTML, DocBook and Unix man pages.
-   The documentation is extracted directly from the sources, which makes
-   it much easier to keep the documentation consistent with the source code.
-2. You can configure doxygen to extract the code structure from undocumented
-   source files. This is very useful to quickly find your way in large
-   source distributions. Doxygen can also visualize the relations between
-   the various elements by means of include dependency graphs, inheritance
-   diagrams, and collaboration diagrams, which are all generated automatically.
-3. You can also use doxygen for creating normal documentation (as I did for
-   the doxygen user manual and doxygen website).
+---
 
-Download
----------
-The latest binaries and Doxygen source code can be downloaded from:
-* https://www.doxygen.nl/
+## Branching Model
 
-Developers
----------
-* Linux, Windows and MacOS Build Status: <a href="https://github.com/doxygen/doxygen/actions"><img alt="Github Actions Build Status" src="https://github.com/doxygen/doxygen/workflows/CMake%20Build%20for%20Doxygen/badge.svg"></a>
+### `master`
+- Tracks **upstream `master`**
+- Contains **no fork-specific changes**
+- Used only to follow upstream development
 
-* Coverity Scan Build Status: <a href="https://scan.coverity.com/projects/2860"> <img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/2860/badge.svg"/> </a>
+### Release branches (`Release_X_Y_Z`)
+- Created from the **exact upstream Doxygen release commit**
+- Contain **only fork-specific changes**
+- This is where **all active development happens**
+- **Never rebased or force-pushed**
 
-* Doxygen's <a href="https://doxygen.github.io/doxygen-docs/">internal source code documentation</a>
+Examples:
+```
+Release_1_16_0
+Release_1_16_1
+```
 
-* Install: Please read the installation section of the manual (https://www.doxygen.nl/manual/install.html)
+### Default branch
+- Set to the **latest release branch**
+- Always represents a **stable, usable version**
 
-* Project stats: https://www.openhub.net/p/doxygen
+---
 
-Issues, bugs, requests, ideas
-----------------------------------
-Use the [issue](https://github.com/doxygen/doxygen/issues) tracker to report bugs.
+## Development Workflow (Important)
 
-Comms
-----------------------------------
-### Mailing Lists ###
+All changes are applied via **pull requests into the active release branch**.
 
-There are three mailing lists:
+### Rules
+- ❌ No direct pushes to `Release_*`
+- ❌ No rebases of published branches
+- ✅ All changes go through PRs
+- ✅ Cherry-picks are preferred over merges from upstream
 
-* doxygen-announce@lists.sourceforge.net     - Announcement of new releases only
-* doxygen-users@lists.sourceforge.net        - for doxygen users
-* doxygen-develop@lists.sourceforge.net      - for doxygen developers
-* To subscribe follow the link to
-    * https://sourceforge.net/projects/doxygen/
+This applies even for single-maintainer workflows.
 
-Source Code
-----------------------------------
-In May 2013, Doxygen moved from
-subversion to git hosted at GitHub
-* https://github.com/doxygen/doxygen
+---
 
-Enjoy,
+## Updating to a New Upstream Doxygen Release
 
-Dimitri van Heesch (doxygen at gmail.com)
+When upstream publishes a new Doxygen release:
+
+1. Create a new release branch at the upstream release commit: `Release_X_Y_Z`
+2. Cherry-pick all fork-specific commits from the previous release branch
+3. Resolve conflicts (only fork code should conflict)
+4. Create a new release tag `X.Y.Z-openvadl1`
+
+Old release branches remain **unchanged and reproducible**.
+
+---
+
+## Versioning Scheme
+
+Versions are derived from the upstream Doxygen version with a fork-specific suffix: `-openvadl`
+
+Examples:
+```
+1.16.0-openvadl1
+1.16.0-openvadl2
+1.16.1-openvadl1
+```
+- `<doxygen-version>`  
+  Exact upstream release version
+
+- `cocor<N>`  
+  Incremented for fork-specific changes
+
+All versions are created as **Git tags**.
+
