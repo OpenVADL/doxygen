@@ -73,7 +73,7 @@ Examples:
 - `<doxygen-version>`  
   Exact upstream release version
 
-- `cocor<N>`  
+- `openvadl<N>`  
   Incremented for fork-specific changes
 
 All versions are created as **Git tags**.
