@@ -416,6 +416,14 @@ static QCString definitionToName(const Definition *ctx)
       return "friend";
     else if (md->isDefine())
       return "define";
+    else if (md->isGrammarCharacter())
+      return "character";
+    else if (md->isGrammarToken())
+      return "token";
+    else if (md->isGrammarPragma())
+      return "pragma";
+    else if (md->isGrammarProduction())
+      return "production";
   }
   else if (ctx)
   {

@@ -105,6 +105,8 @@ set(LEX_FILES
     sqlcode
     vhdlcode
     xmlcode
+    cocorcode
+    cocorscanner
 )
 
 if (NOT depfile_supported)
@@ -215,6 +217,10 @@ add_library(doxymain STATIC
     # generated for/by flex/bison
     ${LEX_FILES_H}
     ${LEX_FILES_CPP}
+    ${GENERATED_SRC}/cocorcode.l.h
+    ${GENERATED_SRC}/cocorscanner.l.h
+    ${GENERATED_SRC}/cocorcode.cpp
+    ${GENERATED_SRC}/cocorscanner.cpp
     #
     ${GENERATED_SRC}/ce_parse.cpp
     # custom generated files

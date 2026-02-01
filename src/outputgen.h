@@ -69,7 +69,7 @@ class OutputCodeIntf
 
     virtual OutputType type() const = 0;
     virtual std::unique_ptr<OutputCodeIntf> clone() = 0;
-    virtual void codify(const QCString &s) = 0;
+    virtual void codify(const QCString &s, bool customEnv=false) = 0;
     virtual void stripCodeComments(bool b) = 0;
     virtual void startSpecialComment() = 0;
     virtual void endSpecialComment() = 0;
@@ -291,10 +291,10 @@ class OutputGenIntf
     virtual void startParameterName(bool one) = 0;
     virtual void endParameterName() = 0;
     virtual void startParameterExtra() = 0;
-    virtual void endParameterExtra(bool last,bool one,bool bracket) = 0;
+    virtual void endParameterExtra(bool last,bool one,bool bracket, char = '(') = 0;
     virtual void startParameterDefVal(const char *separator) = 0;
     virtual void endParameterDefVal() = 0;
-    virtual void startParameterList(bool openBracket) = 0;
+    virtual void startParameterList(bool openBracket, char = '(') = 0;
     virtual void endParameterList() = 0;
     virtual void exceptionEntry(const QCString &prefix,bool closeBracket) = 0;
     virtual void startConstraintList(const QCString &header) = 0;

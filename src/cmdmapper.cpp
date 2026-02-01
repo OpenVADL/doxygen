@@ -154,6 +154,7 @@ static const CommandMap<CommandType> g_cmdMap =
   { "docbookinclude",CommandType::CMD_DOCBOOKINCLUDE },
   { "maninclude",    CommandType::CMD_MANINCLUDE },
   { "xmlinclude",    CommandType::CMD_XMLINCLUDE },
+  { "refFrom",       CommandType::CMD_USAGELIST },
   { "iline",         CommandType::CMD_ILINE },
   { "ifile",         CommandType::CMD_IFILE },
   { "iliteral",      CommandType::CMD_ILITERAL },

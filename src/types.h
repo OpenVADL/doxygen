@@ -184,23 +184,24 @@ enum class Relationship   {
 
 /** Language as given by extension */
 #define SRCLANGEXT_SPECIFICATIONS \
-  SRCLANGEXT(Unknown  , 0x00000, Unknown) \
-  SRCLANGEXT(IDL      , 0x00008, IDL) \
-  SRCLANGEXT(Java     , 0x00010, Java) \
-  SRCLANGEXT(CSharp   , 0x00020, C#) \
-  SRCLANGEXT(D        , 0x00040, D) \
-  SRCLANGEXT(PHP      , 0x00080, PHP) \
-  SRCLANGEXT(ObjC     , 0x00100, Objective-C) \
-  SRCLANGEXT(Cpp      , 0x00200, C++) \
-  SRCLANGEXT(JS       , 0x00400, Javascript) \
-  SRCLANGEXT(Python   , 0x00800, Python) \
-  SRCLANGEXT(Fortran  , 0x01000, Fortran) \
-  SRCLANGEXT(VHDL     , 0x02000, VHDL) \
-  SRCLANGEXT(XML      , 0x04000, XML) \
-  SRCLANGEXT(Markdown , 0x10000, Markdown) \
-  SRCLANGEXT(SQL      , 0x20000, SQL) \
-  SRCLANGEXT(Slice    , 0x40000, Slice) \
-  SRCLANGEXT(Lex      , 0x80000, Lex)
+  SRCLANGEXT(Unknown  , 0x000000, Unknown) \
+  SRCLANGEXT(IDL      , 0x000008, IDL) \
+  SRCLANGEXT(Java     , 0x000010, Java) \
+  SRCLANGEXT(CSharp   , 0x000020, C#) \
+  SRCLANGEXT(D        , 0x000040, D) \
+  SRCLANGEXT(PHP      , 0x000080, PHP) \
+  SRCLANGEXT(ObjC     , 0x000100, Objective-C) \
+  SRCLANGEXT(Cpp      , 0x000200, C++) \
+  SRCLANGEXT(JS       , 0x000400, Javascript) \
+  SRCLANGEXT(Python   , 0x000800, Python) \
+  SRCLANGEXT(Fortran  , 0x001000, Fortran) \
+  SRCLANGEXT(VHDL     , 0x002000, VHDL) \
+  SRCLANGEXT(XML      , 0x004000, XML) \
+  SRCLANGEXT(Markdown , 0x010000, Markdown) \
+  SRCLANGEXT(SQL      , 0x020000, SQL) \
+  SRCLANGEXT(Slice    , 0x040000, Slice) \
+  SRCLANGEXT(Lex      , 0x080000, Lex) \
+  SRCLANGEXT(CocoR    , 0x100000, Cocor)
 
   /* SRCLANGEXT(Tcl      , 0x08000, Tcl ) // no longer supported */
 
@@ -311,10 +312,18 @@ struct Grouping
   ML_TYPE(DecPropMembers,      Declaration,  Invalid,           Invalid,          "prop-members",          ""                        ) \
   ML_TYPE(DecSequenceMembers,  Declaration,  Invalid,           Invalid,          "sequence-members",      "sequence"                ) \
   ML_TYPE(DecDictionaryMembers,Declaration,  Invalid,           Invalid,          "dictionary-members",    "dictionary"              ) \
+  ML_TYPE(DecGrammarCharacterMembers,     Declaration,Invalid,  Invalid,          "dec-grammar-character-members",""                 ) \
+  ML_TYPE(DecGrammarTokenMembers,         Declaration,Invalid,  Invalid,          "dec-grammar-token-members",""                     ) \
+  ML_TYPE(DecGrammarPragmaMembers,        Declaration,Invalid,  Invalid,          "dec-grammar-pragma-members",""                    ) \
+  ML_TYPE(DecGrammarProductionMembers,    Declaration,Invalid,  Invalid,          "dec-grammar-production-members",""                ) \
   ML_TYPE(TypedefMembers,      Detailed,     Invalid,           Invalid,          "doc-typedef-members",   ""                        ) \
   ML_TYPE(EnumMembers,         Detailed,     Invalid,           Invalid,          "doc-enum-members",      ""                        ) \
   ML_TYPE(EnumValMembers,      Detailed,     Invalid,           Invalid,          "doc-enum-val-members",  ""                        ) \
   ML_TYPE(FunctionMembers,     Detailed,     Invalid,           Invalid,          "doc-func-members",      ""                        ) \
+  ML_TYPE(CharacterMembers,    Detailed,     Invalid,           Invalid,          "doc-character-members",  ""                       ) \
+  ML_TYPE(TokenMembers,        Detailed,     Invalid,           Invalid,          "doc-token-members",  ""                           ) \
+  ML_TYPE(PragmaMembers,       Detailed,     Invalid,           Invalid,          "doc-pragma-members",  ""                          ) \
+  ML_TYPE(ProductionMembers,   Detailed,     Invalid,           Invalid,          "doc-production-members",  ""                      ) \
   ML_TYPE(RelatedMembers,      Detailed,     Invalid,           Invalid,          "doc-related-members",   ""                        ) \
   ML_TYPE(VariableMembers,     Detailed,     Invalid,           Invalid,          "doc-variable-members",  ""                        ) \
   ML_TYPE(PropertyMembers,     Detailed,     Invalid,           Invalid,          "doc-property-members",  ""                        ) \
@@ -338,6 +347,11 @@ struct Grouping
   ML_TYPE(DocPropMembers,      Documentation,Invalid,           Invalid,          "doc-prop-members",      ""                        ) \
   ML_TYPE(DocSequenceMembers,  Documentation,Invalid,           Invalid,          "doc-sequence-members",  ""                        ) \
   ML_TYPE(DocDictionaryMembers,Documentation,Invalid,           Invalid,          "doc-dictionary-members",""                        ) \
+  ML_TYPE(DocDeclarationMembers,          Documentation,Invalid,Invalid,          "dec-grammar-character-members",""                 ) \
+  ML_TYPE(DocGrammarCharacterMembers,     Documentation,Invalid,Invalid,          "doc-grammar-character-members",""                 ) \
+  ML_TYPE(DocGrammarTokenMembers,         Documentation,Invalid,Invalid,          "doc-grammar-token-members",""                     ) \
+  ML_TYPE(DocGrammarPragmaMembers,        Documentation,Invalid,Invalid,          "doc-grammar-pragma-members",""                    ) \
+  ML_TYPE(DocGrammarProductionMembers,    Documentation,Invalid,Invalid,          "doc-grammar-production-members",""                ) \
 
 /** Wrapper class for the MemberListType type. Can be set only during construction.
  *  Packs the type together with category flags.
@@ -509,7 +523,12 @@ enum class CodeSymbolType
   Property,
   Event,
   Sequence,
-  Dictionary
+  Dictionary,
+  Declaration,
+  GrammarCharacter,
+  GrammarToken,
+  GrammarPragma,
+  GrammarProduction
 };
 
 constexpr const char *codeSymbolType2Str(CodeSymbolType type) noexcept
@@ -542,6 +561,11 @@ constexpr const char *codeSymbolType2Str(CodeSymbolType type) noexcept
     case CodeSymbolType::Event:       return "event";
     case CodeSymbolType::Sequence:    return "sequence";
     case CodeSymbolType::Dictionary:  return "dictionary";
+    case CodeSymbolType::Declaration:  return "declaration";
+    case CodeSymbolType::GrammarCharacter:  return "grammarcharacter";
+    case CodeSymbolType::GrammarToken:  return "grammartoken";
+    case CodeSymbolType::GrammarPragma:  return "grammarpragma";
+    case CodeSymbolType::GrammarProduction:  return "grammaproduction";
     default:
       return nullptr;
   }
@@ -565,7 +589,12 @@ enum class MemberType
   Interface,
   Service,
   Sequence,
-  Dictionary
+  Dictionary,
+  Declaration,
+  GrammarCharacter,
+  GrammarToken,
+  GrammarPragma,
+  GrammarProduction
 };
 
 enum class FortranFormat
@@ -797,6 +826,11 @@ enum class VhdlSpecifier
  ETYPE(DirDoc,             Doc)             \
  ETYPE(Variable,           None)            \
  ETYPE(Function,           None)            \
+ ETYPE(Declaration,        None)            \
+ ETYPE(GrammarCharacter,   None)            \
+ ETYPE(GrammarToken,       None)            \
+ ETYPE(GrammarPragma,      None)            \
+ ETYPE(GrammarProduction,  None)            \
  ETYPE(Typedef,            None)            \
  ETYPE(Include,            None)            \
  ETYPE(Enum,               None)            \

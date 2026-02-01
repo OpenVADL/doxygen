@@ -22,7 +22,7 @@ class DevNullCodeGenerator : public OutputCodeIntf
   public:
     OutputType type() const override { return OutputType::Null; }
     std::unique_ptr<OutputCodeIntf> clone() override { return std::make_unique<DevNullCodeGenerator>(*this); }
-    void codify(const QCString &) override {}
+    void codify(const QCString &, bool customEnv = false) override {}
     void stripCodeComments(bool) override {}
     void startSpecialComment() override {}
     void endSpecialComment() override {}

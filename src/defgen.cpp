@@ -107,6 +107,11 @@ static void generateDEFForMember(const MemberDef *md,
     case MemberType::Friend:      memType="friend";     isFunc=TRUE; break;
     case MemberType::DCOP:        memType="dcop";       isFunc=TRUE; break;
     case MemberType::Slot:        memType="slot";       isFunc=TRUE; break;
+    case MemberType::Declaration: memType="declaration";         break;
+    case MemberType::GrammarCharacter:   memType="character";    break;
+    case MemberType::GrammarToken:       memType="token";        break;
+    case MemberType::GrammarPragma:      memType="pragma";       break;
+    case MemberType::GrammarProduction:  memType="production";   break;
   }
 
   t << memPrefix << "kind = '" << memType << "';\n";
@@ -436,6 +441,10 @@ static void generateDEFForNamespace(const NamespaceDef *nd,TextStream &t)
   generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecEnumMembers()),"enum");
   generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecFuncMembers()),"func");
   generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecVarMembers()),"var");
+  generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecGrammarCharacterMembers()),"grammar-char");
+  generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecGrammarTokenMembers()),"grammar-token");
+  generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecGrammarPragmaMembers()),"grammar-pragma");
+  generateDEFSection(nd,t,nd->getMemberList(MemberListType::DecGrammarProductionMembers()),"grammar-production");
 
   t << "  ns-filename  = '" << nd->getDefFileName() << "';\n";
   t << "  ns-fileline  = '" << nd->getDefLine()     << "';\n";
@@ -465,6 +474,10 @@ static void generateDEFForFile(const FileDef *fd,TextStream &t)
   generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecEnumMembers()),"enum");
   generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecFuncMembers()),"func");
   generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecVarMembers()),"var");
+  generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecGrammarCharacterMembers()),"character");
+  generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecGrammarTokenMembers()),"token");
+  generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecGrammarPragmaMembers()),"pragma");
+  generateDEFSection(fd,t,fd->getMemberList(MemberListType::DecGrammarProductionMembers()),"production");
 
   t << "  file-full-name  = '" << fd->getDefFileName() << "';\n";
   t << "  file-first-line = '" << fd->getDefLine()     << "';\n";

@@ -159,7 +159,7 @@ void ManCodeGenerator::writeCodeLink(CodeSymbolType,
   }
 }
 
-void ManCodeGenerator::codify(const QCString &str)
+void ManCodeGenerator::codify(const QCString &str, bool customEnv)
 {
   const int tabSize = Config_getInt(TAB_SIZE);
   const size_t stripAmount = m_stripIndentAmount;
@@ -911,16 +911,16 @@ void ManGenerator::writeInheritedSectionTitle(
   m_firstCol = FALSE;
 }
 
-void ManGenerator::startParameterList(bool openBracket)
+void ManGenerator::startParameterList(bool openBracket, char bracket)
 {
-  if (openBracket) m_t << "(";
+  if (openBracket) m_t << bracket;
 }
 
-void ManGenerator::endParameterExtra(bool last,bool /* emptyList */, bool closeBracket)
+void ManGenerator::endParameterExtra(bool last,bool /*emptyList*/,bool closeBracket,char bracket)
 {
   if (last && closeBracket)
   {
-    m_t << ")";
+    m_t << bracket;
   }
 }
 void ManGenerator::endParameterType()

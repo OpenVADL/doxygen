@@ -52,7 +52,7 @@ class DocbookCodeGenerator : public OutputCodeIntf
 
     OutputType type() const override { return OutputType::Docbook; }
     std::unique_ptr<OutputCodeIntf> clone() override { return std::make_unique<DocbookCodeGenerator>(m_t); }
-    void codify(const QCString &text) override;
+    void codify(const QCString &text, bool customEnv=false) override;
     void stripCodeComments(bool b) override;
     void startSpecialComment() override;
     void endSpecialComment() override;
@@ -283,10 +283,10 @@ class DocbookGenerator : public OutputGenerator, public OutputGenIntf
     void startParameterName(bool) override;
     void endParameterName() override;
     void startParameterExtra() override;
-    void endParameterExtra(bool,bool,bool) override;
+    void endParameterExtra(bool,bool,bool, char = ')') override;
     void startParameterDefVal(const char *sep) override;
     void endParameterDefVal() override;
-    void startParameterList(bool) override;
+    void startParameterList(bool, char = '(') override;
     void endParameterList() override;
     void exceptionEntry(const QCString &,bool) override;
 

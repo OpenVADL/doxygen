@@ -209,7 +209,7 @@ XMLCodeGenerator::XMLCodeGenerator(TextStream *t) : m_t(t)
 }
 
 /** Generator for producing XML formatted source code. */
-void XMLCodeGenerator::codify(const QCString &text)
+void XMLCodeGenerator::codify(const QCString &text, bool customEnv)
 {
   XML_DB(("(codify \"%s\")\n",qPrint(text)));
   if (!m_hide && m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag)
@@ -712,6 +712,11 @@ static void generateXMLForMember(const MemberDef *md,TextStream &ti,TextStream &
     case MemberType::Service:     memType="service";     break;
     case MemberType::Sequence:    memType="sequence";    break;
     case MemberType::Dictionary:  memType="dictionary";  break;
+    case MemberType::Declaration: memType="declaration";        break;
+    case MemberType::GrammarCharacter:   memType="character";  break;
+    case MemberType::GrammarToken:       memType="token";      break;
+    case MemberType::GrammarPragma:      memType="pragma";     break;
+    case MemberType::GrammarProduction:  memType="production"; break;
   }
 
   QCString nameStr = md->name();

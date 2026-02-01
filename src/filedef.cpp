@@ -1375,6 +1375,25 @@ void FileDefImpl::insertMember(MemberDef *md)
       addMemberToList(MemberListType::DecDefineMembers(),md);
       addMemberToList(MemberListType::DocDefineMembers(),md);
       break;
+    case MemberType::Declaration:
+      addMemberToList(MemberListType::DocDeclarationMembers(),md);
+      break;
+    case MemberType::GrammarCharacter:
+      addMemberToList(MemberListType::DecGrammarCharacterMembers(),md);
+      addMemberToList(MemberListType::DocGrammarCharacterMembers(),md);
+      break;
+    case MemberType::GrammarToken:
+      addMemberToList(MemberListType::DecGrammarTokenMembers(),md);
+      addMemberToList(MemberListType::DocGrammarTokenMembers(),md);
+      break;
+    case MemberType::GrammarPragma:
+      addMemberToList(MemberListType::DecGrammarPragmaMembers(),md);
+      addMemberToList(MemberListType::DocGrammarPragmaMembers(),md);
+      break;
+    case MemberType::GrammarProduction:
+      addMemberToList(MemberListType::DecGrammarProductionMembers(),md);
+      addMemberToList(MemberListType::DocGrammarProductionMembers(),md);
+      break;
     default:
        err("FileDefImpl::insertMembers(): "
            "member '{}' with class scope '{}' inserted in file scope '{}'!\n",
@@ -1429,6 +1448,25 @@ void FileDefImpl::removeMember(MemberDef *md)
       removeMemberFromList(MemberListType::DocEnumMembers(),md);
       break;
     case MemberType::EnumValue:    // enum values are shown inside their enums
+      break;
+    case MemberType::Declaration:
+      removeMemberFromList(MemberListType::DocDeclarationMembers(),md);
+      break;
+    case MemberType::GrammarCharacter:
+      removeMemberFromList(MemberListType::DecGrammarCharacterMembers(),md);
+      removeMemberFromList(MemberListType::DocGrammarCharacterMembers(),md);
+      break;
+    case MemberType::GrammarToken:
+      removeMemberFromList(MemberListType::DecGrammarTokenMembers(),md);
+      removeMemberFromList(MemberListType::DocGrammarTokenMembers(),md);
+      break;
+    case MemberType::GrammarPragma:
+      removeMemberFromList(MemberListType::DecGrammarPragmaMembers(),md);
+      removeMemberFromList(MemberListType::DocGrammarPragmaMembers(),md);
+      break;
+    case MemberType::GrammarProduction:
+      removeMemberFromList(MemberListType::DecGrammarProductionMembers(),md);
+      removeMemberFromList(MemberListType::DocGrammarProductionMembers(),md);
       break;
     case MemberType::Define:
       removeMemberFromList(MemberListType::DecDefineMembers(),md);

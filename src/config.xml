@@ -4328,6 +4328,30 @@ This setting is not only used for dot files but also for msc temporary files.
 ]]>
       </docs>
     </option>
+    <option type='bool' id='GRAMMAR_RULE_BODY' defval='0'>
+      <docs>
+<![CDATA[
+ If the \c GRAMMAR_RULE_BODY tag is set to \c YES, doxygen will
+ add the code of the definition of grammar rules to their documentation automatically.
+]]>
+      </docs>
+    </option>
+    <option type='bool' id='COCOR_REDUCE_FILE_DOC' defval='0'>
+      <docs>
+<![CDATA[
+ If the \c COCOR_REDUCE_FILE_DOC tag is set to \c YES, doxygen will
+ skip over all the file documentations besides .atg or .ATG files.
+]]>
+      </docs>
+    </option>
+    <option type='bool' id='USAGELIST' defval='1'>
+      <docs>
+<![CDATA[
+ When the \c USAGELIST tag is set doxygen will show the specified enumeration values
+ besides the enumeration mnemonics.
+]]>
+      </docs>
+    </option>
     <option type='obsolete' orgtype='bool' id='USE_WINDOWS_ENCODING'/>
     <option type='obsolete' orgtype='bool' id='DETAILS_AT_TOP'/>
     <option type='obsolete' orgtype='string' id='QTHELP_FILE'/>

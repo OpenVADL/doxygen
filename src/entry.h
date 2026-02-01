@@ -47,6 +47,7 @@ class FileDef;
   OVERRIDE_ENTRY(bool,          bool, 1, collaborationGraph   ) \
   OVERRIDE_ENTRY(bool,          bool, 1, groupGraph           ) \
   OVERRIDE_ENTRY(bool,          bool, 1, enumValues           ) \
+  OVERRIDE_ENTRY(bool,          bool, 1, usageList            ) \
   OVERRIDE_ENTRY(CLASS_GRAPH_t, int,  3, inheritanceGraph     )
 
 class CommandOverrides
@@ -189,6 +190,7 @@ class Entry
     bool subGrouping;         //!< automatically group class members?
     bool exported;            //!< is the symbol exported from a C++20 module
     CommandOverrides commandOverrides; //!< store info for commands whose default can be overridden
+    bool usageList;           //!< references from other sources
     Specifier    virt;        //!< virtualness of the entry
     QCString     args;        //!< member argument string
     QCString     bitfields;   //!< member's bit fields

@@ -31,7 +31,7 @@ class RTFCodeGenerator : public OutputCodeIntf
     void setTextStream(TextStream *t) { m_t = t; }
 
     OutputType type() const override { return OutputType::RTF; }
-    void codify(const QCString &text) override;
+    void codify(const QCString &text, bool customEnv=false) override;
     void stripCodeComments(bool b) override;
     void startSpecialComment() override;
     void endSpecialComment() override;
@@ -269,10 +269,10 @@ class RTFGenerator : public OutputGenerator, public OutputGenIntf
     void startParameterName(bool) override {}
     void endParameterName() override {}
     void startParameterExtra() override {}
-    void endParameterExtra(bool,bool,bool) override;
+    void endParameterExtra(bool,bool,bool, char = '(') override;
     void startParameterDefVal(const char *s) override { docify(s); startTypewriter(); }
     void endParameterDefVal() override { endTypewriter(); }
-    void startParameterList(bool) override;
+    void startParameterList(bool, char = '(') override;
     void endParameterList() override {}
     void exceptionEntry(const QCString &,bool) override;
 

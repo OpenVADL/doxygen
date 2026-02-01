@@ -175,6 +175,10 @@ static void splitSearchTokens(QCString &title,IntVector &indices)
 #define SEARCH_INDEX_PAGES        19
 #define SEARCH_INDEX_CONCEPTS     20
 #define SEARCH_INDEX_MODULES      21
+#define SEARCH_INDEX_CHARACTERS   22
+#define SEARCH_INDEX_TOKENS       23
+#define SEARCH_INDEX_PRAGMAS      24
+#define SEARCH_INDEX_PRODUCTIONS  25
 
 static std::array<SearchIndexInfo,NUM_SEARCH_INDICES> g_searchIndexInfo =
 { {
@@ -206,7 +210,11 @@ static std::array<SearchIndexInfo,NUM_SEARCH_INDICES> g_searchIndexInfo =
   { /* SEARCH_INDEX_GROUPS */       "groups"      , []() { return theTranslator->trGroup(TRUE,FALSE);     }, {} },
   { /* SEARCH_INDEX_PAGES */        "pages"       , []() { return theTranslator->trPage(TRUE,FALSE);      }, {} },
   { /* SEARCH_INDEX_CONCEPTS */     "concepts"    , []() { return theTranslator->trConcept(true,false);   }, {} },
-  { /* SEARCH_INDEX_MODULES */      "modules"     , []() { return theTranslator->trModule(true,false);    }, {} }
+  { /* SEARCH_INDEX_MODULES */      "modules"     , []() { return theTranslator->trModule(true,false);    }, {} },
+  { /* SEARCH_INDEX_MODULES */      "characters"  , []() { return theTranslator->trGrammarCharacter(true);  }, {} },
+  { /* SEARCH_INDEX_MODULES */      "tokens"      , []() { return theTranslator->trGrammarToken(true);      }, {} },
+  { /* SEARCH_INDEX_MODULES */      "pragmas"     , []() { return theTranslator->trGrammarPragma(true);     }, {} },
+  { /* SEARCH_INDEX_MODULES */      "productions" , []() { return theTranslator->trGrammarProduction(true); }, {} },
 } };
 
 static void addMemberToSearchIndex(const MemberDef *md)
@@ -275,6 +283,22 @@ static void addMemberToSearchIndex(const MemberDef *md)
                (md->isFriend() && !isFriendToHide))
       {
         g_searchIndexInfo[SEARCH_INDEX_RELATED].add(SearchTerm(n,md));
+      }
+      else if (md->isGrammarCharacter())
+      {
+        g_searchIndexInfo[SEARCH_INDEX_CHARACTERS].add(SearchTerm(n,md));
+      }
+      else if (md->isGrammarToken())
+      {
+        g_searchIndexInfo[SEARCH_INDEX_TOKENS].add(SearchTerm(n,md));
+      }
+      else if (md->isGrammarPragma())
+      {
+        g_searchIndexInfo[SEARCH_INDEX_PRAGMAS].add(SearchTerm(n,md));
+      }
+      else if (md->isGrammarProduction())
+      {
+        g_searchIndexInfo[SEARCH_INDEX_PRODUCTIONS].add(SearchTerm(n,md));
       }
     }
   }

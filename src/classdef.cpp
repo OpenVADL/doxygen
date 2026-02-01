@@ -1284,6 +1284,18 @@ void ClassDefImpl::internalInsertMember(MemberDef *md,
               case MemberType::Variable:
                 addMemberToList(MemberListType::VariableMembers(),md,FALSE);
                 break;
+              case MemberType::GrammarCharacter:
+                addMemberToList(MemberListType::CharacterMembers(),md,FALSE);
+                break;
+              case MemberType::GrammarToken:
+                addMemberToList(MemberListType::TokenMembers(),md,FALSE);
+                break;
+              case MemberType::GrammarPragma:
+                addMemberToList(MemberListType::PragmaMembers(),md,FALSE);
+                break;
+              case MemberType::GrammarProduction:
+                addMemberToList(MemberListType::ProductionMembers(),md,FALSE);
+                break;
               case MemberType::Define:
                 warn(md->getDefFileName(),md->getDefLine()-1,"A define ({}) cannot be made a member of {}",
                      md->name(), this->name());

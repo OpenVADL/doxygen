@@ -1218,6 +1218,34 @@ void DocParser::handleImage(DocNodeVariant *parent, DocNodeList &children)
   children.get_last<DocImage>()->parse();
 }
 
+void DocParser::handleUsageList(DocNodeVariant *parent, DocNodeList &children){
+  const MemberDef *curMd = context.memberDef;
+  const Definition *curScope = context.scope;
+  const QCString &ctx = context.context;
+
+  
+  if (!curMd) return;
+  const MemberDef *cur = curMd->resolveAlias();
+
+  auto refs = cur->getReferencedByMembers();
+  if (refs.empty()) return;
+
+  bool first = true;
+  for (const MemberDef *md : refs)
+  {
+    const MemberDef *ref = md->resolveAlias();
+
+    if (ref == cur) continue;
+
+    if (!first) children.append<DocWord>(this, parent, ", ");
+    first = false;
+
+    const QCString text = (ref->getOuterScope() == curScope) ? ref->name() : ref->qualifiedName();
+
+    children.append<DocRef>(this, parent, text, ctx);
+  }
+}
+
 void DocParser::handleIFile(char cmdChar,const QCString &cmdName)
 {
   AUTO_TRACE();
@@ -1464,6 +1492,11 @@ reparsetoken:
         case CommandType::CMD_IANCHOR:
           {
             handleAnchor(parent,children);
+          }
+          break;
+        case CommandType::CMD_USAGELIST:
+          {
+            handleUsageList(parent,children);
           }
           break;
         case CommandType::CMD_IPREFIX:

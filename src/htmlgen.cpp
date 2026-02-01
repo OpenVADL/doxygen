@@ -757,7 +757,7 @@ void HtmlCodeGenerator::setRelativePath(const QCString &path)
   m_relPath = path;
 }
 
-void HtmlCodeGenerator::codify(const QCString &str)
+void HtmlCodeGenerator::codify(const QCString &str, bool customEnv)
 {
   if (!str.isEmpty())
   {
@@ -2363,11 +2363,12 @@ void HtmlGenerator::endMemberDocName()
   m_t << "</td>\n";
 }
 
-void HtmlGenerator::startParameterList(bool openBracket)
+void HtmlGenerator::startParameterList(bool openBracket, char bracket)
 {
   DBG_HTML(m_t << "<!-- startParameterList -->\n";)
   m_t << "          <td>";
-  if (openBracket) m_t << "(";
+  char bracketBuf[2] = {bracket, 0};
+  if (openBracket) docify(bracketBuf);
   m_t << "</td>\n";
 }
 
@@ -2411,7 +2412,7 @@ void HtmlGenerator::startParameterExtra()
   DBG_HTML(m_t << "<!-- startParameterExtra -->\n";)
 }
 
-void HtmlGenerator::endParameterExtra(bool last,bool emptyList, bool closeBracket)
+void HtmlGenerator::endParameterExtra(bool last,bool emptyList, bool closeBracket, char bracket)
 {
   DBG_HTML(m_t << "<!-- endParameterExtra -->\n";)
   if (last)
@@ -2425,7 +2426,8 @@ void HtmlGenerator::endParameterExtra(bool last,bool emptyList, bool closeBracke
     else
     {
       m_t << "&#160;";
-      if (closeBracket) m_t << ")";
+      char bracketBuf[2] = {bracket, 0};
+      if (closeBracket) docify(bracketBuf);
     }
   }
   else

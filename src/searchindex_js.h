@@ -30,7 +30,7 @@
 #include "qcstring.h"
 #include "utf8.h"
 
-#define NUM_SEARCH_INDICES 22
+#define NUM_SEARCH_INDICES 26
 
 class SectionInfo;
 class Definition;

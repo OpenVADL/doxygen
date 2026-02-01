@@ -49,7 +49,7 @@ class OutputCodeDefer : public OutputCodeIntf
     OutputCodeDefer(OutputCodeGen *codeGen) : m_codeGen(codeGen) {}
     OutputType type() const override { return m_codeGen->type(); }
     std::unique_ptr<OutputCodeIntf> clone() override { return std::make_unique<OutputCodeDefer>(*this); }
-    void codify(const QCString &s) override { m_codeGen->codify(s); }
+    void codify(const QCString &s, bool customEnv=false) override { m_codeGen->codify(s, customEnv); }
     void stripCodeComments(bool b) override { m_codeGen->stripCodeComments(b); }
     void startSpecialComment() override { m_codeGen->startSpecialComment(); }
     void endSpecialComment() override { m_codeGen->endSpecialComment(); }
@@ -113,7 +113,7 @@ class OutputCodeRecorder : public OutputCodeIntf
 {
   public:
     OutputType type() const override { return OutputType::Recorder; }
-    void codify(const QCString &s) override;
+    void codify(const QCString &s, bool customEnv=false) override;
     void stripCodeComments(bool) override {}
     void startSpecialComment() override;
     void endSpecialComment() override;
@@ -233,7 +233,7 @@ class OutputCodeList
     // ---- OutputCodeIntf forwarding
 
     void codify(const QCString &s)
-    { foreach(&OutputCodeIntf::codify,s); }
+    { foreach(&OutputCodeIntf::codify,s, false); }
 
     void stripCodeComments(bool b)
     { foreach(&OutputCodeIntf::stripCodeComments,b); }
@@ -691,14 +691,14 @@ class OutputList
     { foreach(&OutputGenIntf::endParameterName); }
     void startParameterExtra()
     { foreach(&OutputGenIntf::startParameterExtra); }
-    void endParameterExtra(bool last,bool one,bool bracket)
-    { foreach(&OutputGenIntf::endParameterExtra,last,one,bracket); }
+    void endParameterExtra(bool last,bool one,bool bracket, char brack= '(')
+    { foreach(&OutputGenIntf::endParameterExtra,last,one,bracket, brack); }
     void startParameterDefVal(const char *separator)
     { foreach(&OutputGenIntf::startParameterDefVal,separator); }
     void endParameterDefVal()
     { foreach(&OutputGenIntf::endParameterDefVal); }
-    void startParameterList(bool openBracket)
-    { foreach(&OutputGenIntf::startParameterList,openBracket); }
+    void startParameterList(bool openBracket, char brack = '(')
+    { foreach(&OutputGenIntf::startParameterList,openBracket, brack); }
     void endParameterList()
     { foreach(&OutputGenIntf::endParameterList); }
     void exceptionEntry(const QCString &prefix,bool closeBracket)

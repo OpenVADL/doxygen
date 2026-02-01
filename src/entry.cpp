@@ -63,6 +63,7 @@ Entry::Entry(const Entry &e) : section(e.section)
   proto       = e.proto;
   subGrouping = e.subGrouping;
   commandOverrides = e.commandOverrides;
+  usageList   = e.usageList;
   exported    = e.exported;
   virt        = e.virt;
   args        = e.args;
@@ -212,6 +213,7 @@ void Entry::reset()
   endBodyLine = -1;
   mGrpId = -1;
   commandOverrides.reset();
+  usageList = false;
   exported = false;
   section = EntryType::makeEmpty();
   mtype   = MethodTypes::Method;

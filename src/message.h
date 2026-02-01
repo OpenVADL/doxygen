@@ -223,6 +223,11 @@ template<> struct fmt::formatter<MemberType> : formatter<std::string>
       case MemberType::Service:     result="Service";     break;
       case MemberType::Sequence:    result="Sequence";    break;
       case MemberType::Dictionary:  result="Dictionary";  break;
+      case MemberType::Declaration:       result="Declaration";  break;
+      case MemberType::GrammarCharacter:  result="Character";  break;
+      case MemberType::GrammarToken:      result="Token";      break;
+      case MemberType::GrammarPragma:     result="Pragma";     break;
+      case MemberType::GrammarProduction: result="Production"; break;
     }
     return formatter<std::string>::format(result, ctx);
   }

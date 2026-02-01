@@ -127,6 +127,11 @@ namespace FileMemberHighlight
     Enums,
     EnumValues,
     Defines,
+    Declarations,
+    GrammarCharacters,
+    GrammarTokens,
+    GrammarPragmas,
+    GrammarProductions,
     Total
   };
 } // namespace FileMemberHighlight
@@ -143,6 +148,11 @@ namespace NamespaceMemberHighlight
     Dictionaries,
     Enums,
     EnumValues,
+    Declarations,
+    GrammarCharacters,
+    GrammarTokens,
+    GrammarPragmas,
+    GrammarProductions,
     Total
   };
 } // namespace NamespaceMemberHighlight

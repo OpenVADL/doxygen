@@ -1542,6 +1542,22 @@ void TagFileParser::buildMemberList(const std::shared_ptr<Entry> &ce,const std::
       me->section = EntryType::makeFunction();
       me->mtype = MethodTypes::Slot;
     }
+    else if (tmi.kind=="character")
+    {
+      me->section = EntryType::makeGrammarCharacter();
+    }
+    else if (tmi.kind=="token")
+    {
+      me->section = EntryType::makeGrammarToken();
+    }
+    else if (tmi.kind=="PRAGMA")
+    {
+      me->section = EntryType::makeGrammarPragma();
+    }
+    else if (tmi.kind=="PRODUCTION")
+    {
+      me->section = EntryType::makeGrammarProduction();
+    }
     ce->moveToSubEntryAndKeep(me);
   }
 }
