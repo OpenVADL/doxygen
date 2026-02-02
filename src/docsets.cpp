@@ -331,6 +331,7 @@ void DocSets::addIndexItem(const Definition *context,const MemberDef *md,
     case SrcLangExt::Markdown:lang="markdown"; break;   // Markdown
     case SrcLangExt::Slice:   lang="slice"; break;      // Slice
     case SrcLangExt::Lex:     lang="lex"; break;        // Lex
+    case SrcLangExt::CocoR:   lang="cocor"; break;      // CocoR
     case SrcLangExt::Unknown: lang="unknown"; break;    // should not happen!
   }
 
@@ -393,6 +394,16 @@ void DocSets::addIndexItem(const Definition *context,const MemberDef *md,
         type="sequence"; break;
       case MemberType::Dictionary:
         type="dictionary"; break;
+      case MemberType::Declaration:
+        type="declaration"; break;
+      case MemberType::GrammarCharacter:
+        type="character"; break;
+      case MemberType::GrammarToken:
+        type="token"; break;
+      case MemberType::GrammarPragma:
+        type="pragma"; break;
+      case MemberType::GrammarProduction:
+        type="production"; break;
     }
     scope = md->getScopeString();
     fd = md->getFileDef();

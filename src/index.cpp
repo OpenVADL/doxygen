@@ -2928,6 +2928,26 @@ void Index::addClassMemberNameToIndex(const MemberDef *md)
       {
         incrementDocumentedClassMembers(ClassMemberHighlight::Related,letter,md);
       }
+      else if (md->isDeclaration())
+      {
+        incrementDocumentedNamespaceMembers(NamespaceMemberHighlight::Declarations,letter,md);
+      }
+      else if (md->isGrammarCharacter())
+      {
+        incrementDocumentedNamespaceMembers(NamespaceMemberHighlight::GrammarCharacters,letter,md);
+      }
+      else if (md->isGrammarToken())
+      {
+        incrementDocumentedNamespaceMembers(NamespaceMemberHighlight::GrammarTokens,letter,md);
+      }
+      else if (md->isGrammarPragma())
+      {
+        incrementDocumentedNamespaceMembers(NamespaceMemberHighlight::GrammarPragmas,letter,md);
+      }
+      else if (md->isGrammarProduction())
+      {
+        incrementDocumentedNamespaceMembers(NamespaceMemberHighlight::GrammarProductions,letter,md);
+      }
     }
   }
 }
@@ -3027,6 +3047,26 @@ void Index::addFileMemberNameToIndex(const MemberDef *md)
       else if (md->isDefine())
       {
         incrementDocumentedFileMembers(FileMemberHighlight::Defines,letter,md);
+      }
+      else if (md->isDeclaration())
+      {
+        incrementDocumentedFileMembers(FileMemberHighlight::Declarations,letter,md);
+      }
+      else if (md->isGrammarCharacter())
+      {
+        incrementDocumentedFileMembers(FileMemberHighlight::GrammarCharacters,letter,md);
+      }
+      else if (md->isGrammarToken())
+      {
+        incrementDocumentedFileMembers(FileMemberHighlight::GrammarTokens,letter,md);
+      }
+      else if (md->isGrammarPragma())
+      {
+        incrementDocumentedFileMembers(FileMemberHighlight::GrammarPragmas,letter,md);
+      }
+      else if (md->isGrammarProduction())
+      {
+        incrementDocumentedFileMembers(FileMemberHighlight::GrammarProductions,letter,md);
       }
     }
   }
@@ -3316,7 +3356,12 @@ static const FmhlInfo *getFmhlInfo(size_t hl)
     FmhlInfo("globals_dict",theTranslator->trDictionaries()),
     FmhlInfo("globals_enum",theTranslator->trEnumerations()),
     FmhlInfo("globals_eval",theTranslator->trEnumerationValues()),
-    FmhlInfo("globals_defs",theTranslator->trDefines())
+    FmhlInfo("globals_defs",theTranslator->trDefines()),
+    FmhlInfo("globals_declaration",theTranslator->trDeclarations(TRUE)),
+    FmhlInfo("globals_character",theTranslator->trGrammarCharacter(TRUE)),
+    FmhlInfo("globals_token",theTranslator->trGrammarToken(TRUE)),
+    FmhlInfo("globals_pragma",theTranslator->trGrammarPragma(TRUE)),
+    FmhlInfo("globals_production",theTranslator->trGrammarProduction(TRUE)),
   };
   return &fmhlInfo[hl];
 }
@@ -3463,6 +3508,11 @@ static void writeFileMemberIndex(OutputList &ol)
   writeFileMemberIndexFiltered(ol,FileMemberHighlight::Enums);
   writeFileMemberIndexFiltered(ol,FileMemberHighlight::EnumValues);
   writeFileMemberIndexFiltered(ol,FileMemberHighlight::Defines);
+  writeFileMemberIndexFiltered(ol,FileMemberHighlight::Declarations);
+  writeFileMemberIndexFiltered(ol,FileMemberHighlight::GrammarCharacters);
+  writeFileMemberIndexFiltered(ol,FileMemberHighlight::GrammarTokens);
+  writeFileMemberIndexFiltered(ol,FileMemberHighlight::GrammarPragmas);
+  writeFileMemberIndexFiltered(ol,FileMemberHighlight::GrammarProductions);
   if (Index::instance().numDocumentedFileMembers(FileMemberHighlight::All)>0 && addToIndex)
   {
     Doxygen::indexList->decContentsDepth();
@@ -3497,7 +3547,11 @@ static const NmhlInfo *getNmhlInfo(size_t hl)
     NmhlInfo("namespacemembers_sequ",theTranslator->trSequences()),
     NmhlInfo("namespacemembers_dict",theTranslator->trDictionaries()),
     NmhlInfo("namespacemembers_enum",theTranslator->trEnumerations()),
-    NmhlInfo("namespacemembers_eval",theTranslator->trEnumerationValues())
+    NmhlInfo("namespacemembers_eval",theTranslator->trEnumerationValues()),
+    NmhlInfo("namespacemembers_grammar_char",theTranslator->trGrammarCharacter(TRUE)),
+    NmhlInfo("namespacemembers_grammar_token",theTranslator->trGrammarToken(TRUE)),
+    NmhlInfo("namespacemembers_grammar_pragma",theTranslator->trGrammarPragma(TRUE)),
+    NmhlInfo("namespacemembers_grammar_prod",theTranslator->trGrammarProduction(TRUE)),
   };
   return &nmhlInfo[hl];
 }
@@ -3648,6 +3702,10 @@ static void writeNamespaceMemberIndex(OutputList &ol)
   writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::Dictionaries);
   writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::Enums);
   writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::EnumValues);
+  writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::GrammarCharacters);
+  writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::GrammarTokens);
+  writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::GrammarPragmas);
+  writeNamespaceMemberIndexFiltered(ol,NamespaceMemberHighlight::GrammarProductions);
   if (index.numDocumentedNamespaceMembers(NamespaceMemberHighlight::All)>0 && addToIndex)
   {
     Doxygen::indexList->decContentsDepth();
@@ -5096,7 +5154,7 @@ static void writeIndex(OutputList &ol)
       ol.parseText(/*projPrefix+*/ theTranslator->trTopicIndex());
       ol.endIndexSection(IndexSection::isTopicIndex);
     }
-    if (index.numDocumentedDirs()>0)
+    if (index.numDocumentedDirs()>0 && !Config_getBool(COCOR_REDUCE_FILE_DOC) )
     {
       ol.startIndexSection(IndexSection::isDirIndex);
       ol.parseText(theTranslator->trDirIndex());

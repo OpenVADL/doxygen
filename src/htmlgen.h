@@ -34,7 +34,7 @@ class HtmlCodeGenerator : public OutputCodeIntf
 
     OutputType type() const override { return OutputType::Html; }
     std::unique_ptr<OutputCodeIntf> clone() override { return std::make_unique<HtmlCodeGenerator>(*this); }
-    void codify(const QCString &text) override;
+    void codify(const QCString &text, bool customEnv=false) override;
     void stripCodeComments(bool b) override;
     void startSpecialComment() override;
     void endSpecialComment() override;
@@ -296,10 +296,10 @@ class HtmlGenerator : public OutputGenerator, public OutputGenIntf
     void startParameterName(bool) override;
     void endParameterName() override;
     void startParameterExtra() override;
-    void endParameterExtra(bool last,bool emptyList,bool closeBracket) override;
+    void endParameterExtra(bool last,bool emptyList,bool closeBracket, char bracket = ')') override;
     void startParameterDefVal(const char *sep) override;
     void endParameterDefVal() override;
-    void startParameterList(bool) override;
+    void startParameterList(bool, char = '(') override;
     void endParameterList() override;
     void exceptionEntry(const QCString &,bool) override;
 

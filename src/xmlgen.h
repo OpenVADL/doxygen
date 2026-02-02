@@ -24,7 +24,7 @@ class XMLCodeGenerator : public OutputCodeIntf
 
     OutputType type() const override { return OutputType::XML; }
 
-    void codify(const QCString &text) override;
+    void codify(const QCString &text, bool customEnv=false) override;
     void stripCodeComments(bool b) override;
     void startSpecialComment() override;
     void endSpecialComment() override;

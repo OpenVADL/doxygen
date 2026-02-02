@@ -150,7 +150,7 @@ void RTFCodeGenerator::writeCodeLink(CodeSymbolType,
   }
 }
 
-void RTFCodeGenerator::codify(const QCString &str)
+void RTFCodeGenerator::codify(const QCString &str, bool customEnv)
 {
   // note that RTF does not have a "verbatim", so "\n" means
   // nothing... add a "newParagraph()";
@@ -2851,16 +2851,16 @@ void RTFGenerator::writeInheritedSectionTitle(
   m_t << rtf_Style_Reset << "\n";
 }
 
-void RTFGenerator::startParameterList(bool openBracket)
+void RTFGenerator::startParameterList(bool openBracket, char bracket)
 {
-  if (openBracket) m_t << "(";
+  if (openBracket) m_t << bracket;
 }
 
-void RTFGenerator::endParameterExtra(bool last,bool /* emptyList */, bool closeBracket)
+void RTFGenerator::endParameterExtra(bool last,bool /* emptyList */, bool closeBracket,char bracket)
 {
   if (last && closeBracket)
   {
-    m_t << ")";
+    m_t << bracket;
   }
 }
 

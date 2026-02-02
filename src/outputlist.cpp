@@ -228,7 +228,7 @@ void OutputCodeRecorder::startNewLine(int lineNr)
   }
 }
 
-void OutputCodeRecorder::codify(const QCString &s)
+void OutputCodeRecorder::codify(const QCString &s, bool customEnv)
 {
   m_calls.emplace_back([]() { return true; },
                        [=](OutputCodeList *ol) { ol->codify(s); },

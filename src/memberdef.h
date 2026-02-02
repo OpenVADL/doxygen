@@ -117,6 +117,11 @@ class MemberDef : public Definition
     virtual bool isDictionary() const = 0;
     virtual bool isFunction() const = 0;
     virtual bool isFunctionPtr() const = 0;
+    virtual bool isDeclaration() const = 0;
+    virtual bool isGrammarCharacter() const = 0;
+    virtual bool isGrammarToken() const = 0;
+    virtual bool isGrammarPragma() const = 0;
+    virtual bool isGrammarProduction() const = 0;
     virtual bool isDefine() const = 0;
     virtual bool isFriend() const = 0;
     virtual bool isDCOP() const = 0;
@@ -241,6 +246,7 @@ class MemberDef : public Definition
     // referenced related members
     virtual bool hasReferencesRelation() const = 0;
     virtual bool hasReferencedByRelation() const = 0;
+    virtual bool hasUsageList() const = 0;
 
     virtual bool hasInlineSource() const = 0;
     virtual bool hasEnumValues() const = 0;
@@ -380,6 +386,7 @@ class MemberDefMutable : public DefinitionMutable, public MemberDef
 
     virtual void overrideCallGraph(bool e) = 0;
     virtual void overrideCallerGraph(bool e) = 0;
+    virtual void overrideUsageList(bool e) = 0;
     virtual void overrideReferencedByRelation(bool e) = 0;
     virtual void overrideReferencesRelation(bool e) = 0;
     virtual void overrideInlineSource(bool e) = 0;

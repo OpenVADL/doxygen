@@ -76,6 +76,29 @@ inline QCString compileOptions(const QCString &def,SrcLangExt langId1,const QCSt
          "|"+QCString().setNum(static_cast<long>(langId5))+"="+value5;
 }
 
+inline QCString compileOptions(const QCString &def,SrcLangExt langId1,const QCString &value1,
+                                                   SrcLangExt langId2,const QCString &value2,
+                                                   SrcLangExt langId3,const QCString &value3,
+                                                   SrcLangExt langId4,const QCString &value4,
+                                                   SrcLangExt langId5,const QCString &value5,
+                                                   SrcLangExt langId6,const QCString &value6)
+{
+  return compileOptions(def,langId1,value1,langId2,value2,langId3,value3,langId4,value4,langId5,value5)+
+         "|"+QCString().setNum(static_cast<long>(langId6))+"="+value6;
+}
+
+inline QCString compileOptions(const QCString &def,SrcLangExt langId1,const QCString &value1,
+                                                   SrcLangExt langId2,const QCString &value2,
+                                                   SrcLangExt langId3,const QCString &value3,
+                                                   SrcLangExt langId4,const QCString &value4,
+                                                   SrcLangExt langId5,const QCString &value5,
+                                                   SrcLangExt langId6,const QCString &value6,
+                                                   SrcLangExt langId7,const QCString &value7)
+{
+  return compileOptions(def,langId1,value1,langId2,value2,langId3,value3,langId4,value4,langId5,value5,langId6,value6)+
+         "|"+QCString().setNum(static_cast<long>(langId7))+"="+value7;
+}
+
 static bool elemIsVisible(const XMLHandlers::Attributes &attrib,bool defVal=TRUE)
 {
   QCString visible = XMLHandlers::value(attrib,"visible");
@@ -981,6 +1004,7 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
   { "namespace/memberdecl/nestednamespaces",      { startCb(&LayoutParser::startSectionEntry, LayoutDocEntry::NamespaceNestedNamespaces,
                                                             []() { return compileOptions(/* default */      theTranslator->trNamespaces(),
                                                                            SrcLangExt::Java,   theTranslator->trPackages(),
+                                                                           SrcLangExt::CocoR,  theTranslator->trGrammars(),
                                                                            SrcLangExt::VHDL,   theTranslator->trPackages(),
                                                                            SrcLangExt::IDL,    theTranslator->trModules(),
                                                                            SrcLangExt::Fortran,theTranslator->trModules(),
@@ -1025,6 +1049,18 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
                                                             []() { return compileOptions(/* default */      theTranslator->trFunctions(),
                                                                            SrcLangExt::Fortran,theTranslator->trSubprograms(),
                                                                            SrcLangExt::VHDL,   theTranslator->trFunctionAndProc()); })
+                                                  } },
+  { "namespace/memberdecl/characters",            { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarCharacterMembers(),
+                                                            []() { return compileOptions("Grammar characters"); }), 
+                                                  } },
+  { "namespace/memberdecl/tokens",                { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarTokenMembers(),
+                                                            []() { return compileOptions("Grammar tokens"); }), 
+                                                  } },
+  { "namespace/memberdecl/pragmas",               { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarPragmaMembers(),
+                                                            []() { return compileOptions("Grammar pragmas"); }), 
+                                                  } },
+  { "namespace/memberdecl/productions",           { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarProductionMembers(),
+                                                            []() { return compileOptions("Grammar productions"); }), 
                                                   } },
   { "namespace/memberdecl/variables",             { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecVarMembers(),
                                                             []() { return compileOptions(Config_getBool(OPTIMIZE_OUTPUT_SLICE) ?
@@ -1099,6 +1135,7 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
   { "file/memberdecl/namespaces",                 { startCb(&LayoutParser::startSectionEntry,LayoutDocEntry::FileNamespaces,
                                                             []() { return compileOptions(/* default */      theTranslator->trNamespaces(),
                                                                                          SrcLangExt::Java,   theTranslator->trPackages(),
+                                                                                         SrcLangExt::CocoR,  theTranslator->trGrammars(),
                                                                                          SrcLangExt::IDL,    theTranslator->trModules(),
                                                                                          SrcLangExt::Fortran,theTranslator->trModules(),
                                                                                          SrcLangExt::Slice,  theTranslator->trModules()); })
@@ -1131,6 +1168,18 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
                                                                                                             theTranslator->trConstants() :
                                                                                                             theTranslator->trVariables()); })
                                                   } },
+  { "file/memberdecl/characters",                 { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarCharacterMembers(),
+                                                            []() { return compileOptions("Grammar characters"); }) 
+                                                  } },
+  { "file/memberdecl/tokens",                     { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarTokenMembers(),
+                                                            []() { return compileOptions("Grammar tokens"); }) 
+                                                  } },
+  { "file/memberdecl/pragmas",                    { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarPragmaMembers(),
+                                                            []() { return compileOptions("Grammar pragmas"); })
+                                                  } },
+  { "file/memberdecl/productions",                { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarProductionMembers(),
+                                                            []() { return compileOptions("Grammar productions"); }) 
+                                                  } },
   { "file/memberdecl/properties",                 { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::Properties(),
                                                             []() { return compileOptions(theTranslator->trProperties()); })
                                                   } },
@@ -1159,10 +1208,24 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
                                                             []() { return compileOptions(/* default */       theTranslator->trFunctionDocumentation(),
                                                                                          SrcLangExt::Fortran, theTranslator->trSubprogramDocumentation()); })
                                                   } },
+  { "file/memberdef/declarations",                { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocDeclarationMembers(),
+                                                            []() { return compileOptions("Declarations"); }), 
+                                                  } },
+  { "file/memberdef/characters",                  { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocGrammarCharacterMembers(),
+                                                            []() { return compileOptions("Grammar Character Documentation"); }), 
+                                                  } },
+  { "file/memberdef/tokens",                      { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocGrammarTokenMembers(),
+                                                            []() { return compileOptions("Grammar Token Documentation"); }), 
+                                                  } },
+  { "file/memberdef/pragmas",                     { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocGrammarPragmaMembers(),
+                                                            []() { return compileOptions("Grammar Pragma  Documentation"); }), 
+                                                  } },
+  { "file/memberdef/productions",                 { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocGrammarProductionMembers(),
+                                                            []() { return compileOptions("Grammar Production Documentation"); }), 
+                                                  } },
   { "file/memberdef/variables",                   { startCb(&LayoutParser::startMemberDefEntry, MemberListType::DocVarMembers(),
                                                             []() { return compileOptions(theTranslator->trVariableDocumentation()); })
                                                   } },
-
   { "file/memberdef/properties",                  { startCb(&LayoutParser::startMemberDefEntry, MemberListType::PropertyMembers(),
                                                             []() { return compileOptions(theTranslator->trPropertyDocumentation()); })
                                                   } },
@@ -1225,6 +1288,18 @@ static const std::map< std::string, ElementCallbacks > g_elementHandlers =
                                                             []() { return compileOptions(/* default */      theTranslator->trFunctions(),
                                                                                          SrcLangExt::Fortran,theTranslator->trSubprograms(),
                                                                                          SrcLangExt::VHDL,   theTranslator->trFunctionAndProc()); })
+                                                  } },
+  { "group/memberdecl/characters",                 { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarCharacterMembers(),
+                                                            []() { return compileOptions("Grammar characters"); }) 
+                                                  } },
+  { "group/memberdecl/tokens",                     { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarTokenMembers(),
+                                                            []() { return compileOptions("Grammar tokens"); }) 
+                                                  } },
+  { "group/memberdecl/pragmas",                    { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarPragmaMembers(),
+                                                            []() { return compileOptions("Grammar pragmas"); })
+                                                  } },
+  { "group/memberdecl/productions",                { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecGrammarProductionMembers(),
+                                                            []() { return compileOptions("Grammar productions"); }) 
                                                   } },
   { "group/memberdecl/variables",                 { startCb(&LayoutParser::startMemberDeclEntry, MemberListType::DecVarMembers(),
                                                             []() { return compileOptions(theTranslator->trVariables()); })

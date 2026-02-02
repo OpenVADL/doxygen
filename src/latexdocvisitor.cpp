@@ -28,6 +28,7 @@
 #include "util.h"
 #include "message.h"
 #include "parserintf.h"
+#include "fileparser.h"
 #include "msc.h"
 #include "dia.h"
 #include "cite.h"
@@ -417,11 +418,31 @@ void LatexDocVisitor::operator()(const DocVerbatim &s)
   {
     case DocVerbatim::Code:
       {
-        m_ci.startCodeFragment("DoxyCode");
-        getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),langExt,
+        auto codeParser = &getCodeParser(lang);
+        bool isKnown = !dynamic_cast<FileCodeParser*>(codeParser);
+        if (isKnown) {
+          m_ci.startCodeFragment("DoxyCode");
+          getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),langExt,
                                       Config_getBool(STRIP_CODE_COMMENTS),
                                       CodeParserOptions().setExample(s.isExample(),s.exampleFile()));
-        m_ci.endCodeFragment("DoxyCode");
+          m_ci.endCodeFragment("DoxyCode");
+        } else {
+          QCString languageFileExtention = lang;
+          languageFileExtention.remove( 0, 1 );
+
+          QCString lstListingConfig = "";
+          lstListingConfig += "[ label={\\ifdefined\\DoxyCodeLabel\\DoxyCodeLabel\\fi}";
+          lstListingConfig += ", caption={\\ifdefined\\DoxyCodeCaption\\DoxyCodeCaption\\fi}";
+          if( languageFileExtention != "md" )
+          {
+            lstListingConfig += ", language=" + languageFileExtention;
+          }
+          lstListingConfig += " ]";
+
+          m_t << "\n\\begin{lstlisting}" << lstListingConfig << "\n";
+          m_t << s.text();
+          m_t << "\n\\end{lstlisting}\n";
+        }
       }
       break;
     case DocVerbatim::JavaDocLiteral:

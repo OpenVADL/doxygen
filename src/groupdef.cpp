@@ -504,6 +504,34 @@ bool GroupDefImpl::insertMember(MemberDef *md,bool docOnly)
       }
       addMemberToList(MemberListType::DocFriendMembers(),md);
       break;
+    case MemberType::GrammarCharacter:
+      if (!docOnly)
+      {
+        addMemberToList(MemberListType::DecGrammarCharacterMembers(),md);
+      }
+      addMemberToList(MemberListType::DocGrammarCharacterMembers(),md);
+      break;
+    case MemberType::GrammarToken:
+      if (!docOnly)
+      {
+        addMemberToList(MemberListType::DecGrammarTokenMembers(),md);
+      }
+      addMemberToList(MemberListType::DocGrammarTokenMembers(),md);
+      break;
+    case MemberType::GrammarPragma:
+      if (!docOnly)
+      {
+        addMemberToList(MemberListType::DecGrammarPragmaMembers(),md);
+      }
+      addMemberToList(MemberListType::DocGrammarPragmaMembers(),md);
+      break;
+    case MemberType::GrammarProduction:
+      if (!docOnly)
+      {
+        addMemberToList(MemberListType::DecGrammarProductionMembers(),md);
+      }
+      addMemberToList(MemberListType::DocGrammarProductionMembers(),md);
+      break;
     default:
       err("GroupDefImpl::insertMembers(): "
            "member '{}' (typeid='{}') with scope '{}' inserted in group scope '{}'!\n",

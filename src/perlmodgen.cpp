@@ -1507,6 +1507,10 @@ void PerlModGenerator::generatePerlModForMember(const MemberDef *md,const Defini
     case MemberType::Service:     memType="service";    break;
     case MemberType::Sequence:    memType="sequence";   break;
     case MemberType::Dictionary:  memType="dictionary"; break;
+    case MemberType::GrammarCharacter:   memType="character";   break;
+    case MemberType::GrammarToken:       memType="token";       break;
+    case MemberType::GrammarPragma:      memType="pragma";      break;
+    case MemberType::GrammarProduction:  memType="production";  break;
   }
 
   bool isFortran = md->getLanguage()==SrcLangExt::Fortran;

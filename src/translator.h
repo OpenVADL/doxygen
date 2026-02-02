@@ -779,7 +779,32 @@ class Translator
     virtual QCString trUnverifiedRequirements() = 0;
     virtual QCString trUnverifiedRequirementsText(bool singular,const QCString &list) = 0;
 
+//////////////////////////////////////////////////////////////////////////
+// Custom CocoR
+//////////////////////////////////////////////////////////////////////////
 
+    QCString trGrammar(const QCString &name) {
+        return "Grammar "+name;
+    }
+    QCString trGrammars() {
+        return "Grammars";
+    }
+    QCString trDeclarations(bool plural) {
+        // TODO xtext: translations
+        return plural ? "Declaration" : "DeclarationS";
+    }
+    QCString trGrammarCharacter(bool plural) {
+        return plural ? "Grammar Characters" : "Grammar Character";
+    }
+    QCString trGrammarToken(bool plural) {
+        return plural ? "Grammar Tokens" : "Grammar Token";
+    }
+    QCString trGrammarPragma(bool plural) {
+        return plural ? "Grammar Pragmas" : "Grammar Pragma";
+    }
+    QCString trGrammarProduction(bool plural) {
+        return plural ? "Grammar Productions" : "Grammar Production";
+    }
 
 //////////////////////////////////////////////////////////////////////////
 // helpers
@@ -818,5 +843,6 @@ class Translator
     }
 
 };
+
 
 #endif

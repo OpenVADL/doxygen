@@ -4764,6 +4764,11 @@ Token DocPara::handleCommand(char cmdChar, const QCString &cmdName)
         parser()->handleAnchor(thisVariant(),children());
       }
       break;
+    case CommandType::CMD_USAGELIST:
+      {
+        parser()->handleUsageList(thisVariant(), children());
+      }
+      break;
     case CommandType::CMD_IPREFIX:
       {
         parser()->handlePrefix(thisVariant(),children());

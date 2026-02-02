@@ -345,7 +345,8 @@ EntryType guessSection(const QCString &name)
      "cs",                         // C#
      "m","mm",                     // Objective-C
      "ii","ixx","ipp","i++","inl", // C/C++ inline
-     "xml","lex","sql"             // others
+     "xml","lex","sql",            // others
+     "atg"                         // cocor
   };
   static const std::unordered_set<std::string> headerExt = {
      "h", "hh", "hxx", "hpp", "h++", "ixx", // C/C++ header
@@ -5081,6 +5082,7 @@ static std::vector<Lang2ExtMap> g_lang2extMap =
   { "sql",         "sql",           SrcLangExt::SQL,      ".sql" },
   { "md",          "md",            SrcLangExt::Markdown, ".md"  },
   { "lex",         "lex",           SrcLangExt::Lex,      ".l"   },
+  { "cocor",       "cocor",         SrcLangExt::CocoR,    ".atg" },
 };
 
 bool updateLanguageMapping(const QCString &extension,const QCString &language)
@@ -5178,6 +5180,7 @@ void initDefaultExtensionMapping()
   updateLanguageMapping(".markdown", "md");
   updateLanguageMapping(".ice",      "slice");
   updateLanguageMapping(".l",        "lex");
+  updateLanguageMapping(".atg",      "cocor");
   updateLanguageMapping(".doxygen_lex_c", "c"); // this is a placeholder so we can map initializations
                                                 // in the lex scanning to cpp
 }
@@ -5896,7 +5899,7 @@ QCString langToString(SrcLangExt lang)
 /** Returns the scope separator to use given the programming language \a lang */
 QCString getLanguageSpecificSeparator(SrcLangExt lang,bool classScope)
 {
-  if (lang==SrcLangExt::Java || lang==SrcLangExt::CSharp || lang==SrcLangExt::VHDL || lang==SrcLangExt::Python)
+  if (lang==SrcLangExt::Java || lang==SrcLangExt::CSharp || lang==SrcLangExt::VHDL || lang==SrcLangExt::Python || lang==SrcLangExt::CocoR)
   {
     return ".";
   }
@@ -6867,6 +6870,9 @@ void mergeMemberOverrideOptions(MemberDefMutable *md1,MemberDefMutable *md2)
 
   if (Config_getBool(SHOW_ENUM_VALUES)  !=md1->hasEnumValues())   md2->overrideEnumValues(md1->hasEnumValues());
   if (Config_getBool(SHOW_ENUM_VALUES)  !=md2->hasEnumValues())   md1->overrideEnumValues( md2->hasEnumValues());
+  
+  if (Config_getBool(USAGELIST)!=md1->hasUsageList()) md2->overrideUsageList(md1->hasUsageList());
+  if (Config_getBool(USAGELIST)!=md2->hasUsageList()) md1->overrideUsageList(md2->hasUsageList());
 
   if (Config_getBool(REFERENCED_BY_RELATION)!=md1->hasReferencedByRelation()) md2->overrideReferencedByRelation(md1->hasReferencedByRelation());
   if (Config_getBool(REFERENCES_RELATION)   !=md1->hasReferencesRelation())   md2->overrideReferencesRelation(md1->hasReferencesRelation());

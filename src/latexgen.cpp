@@ -75,7 +75,7 @@ void LatexCodeGenerator::setSourceFileName(const QCString &name)
   m_sourceFileName = name;
 }
 
-void LatexCodeGenerator::codify(const QCString &str)
+void LatexCodeGenerator::codify(const QCString &str, bool customEnv)
 {
   if (!str.isEmpty())
   {
@@ -164,6 +164,7 @@ void LatexCodeGenerator::codify(const QCString &str)
                                          false, // insideItem
                                          m_usedTableLevel>0, // insideTable
                                          false  // keepSpaces
+                                         , customEnv
                                         );
                      }
                      break;
@@ -209,12 +210,12 @@ void LatexCodeGenerator::writeCodeLink(CodeSymbolType,
     if (!f.isEmpty() && !anchor.isEmpty()) *m_t << "_";
     if (!anchor.isEmpty()) *m_t << anchor;
     *m_t << "}{";
-    codify(name);
+    codify(name, false);
     *m_t << "}}";
   }
   else
   {
-    codify(name);
+    codify(name, false);
   }
   m_col+=l;
 }
@@ -251,7 +252,7 @@ void LatexCodeGenerator::writeLineNumber(const QCString &ref,const QCString &fil
     }
     else
     {
-      codify(lineNumber);
+      codify(lineNumber, false);
     }
     *m_t << "\\ ";
   }
@@ -259,7 +260,7 @@ void LatexCodeGenerator::writeLineNumber(const QCString &ref,const QCString &fil
   {
     QCString lineNumber;
     lineNumber.sprintf("%05d",l);
-    codify(lineNumber);
+    codify(lineNumber, false);
     *m_t << "\\ ";
   }
   m_col=0;
@@ -285,7 +286,7 @@ void LatexCodeGenerator::endCodeLine()
     *m_t << "}";
     m_doxyCodeLineOpen = FALSE;
   }
-  codify("\n");
+  codify("\n", false);
 }
 
 void LatexCodeGenerator::startFontClass(const QCString &name)
@@ -1231,6 +1232,14 @@ void LatexGenerator::endIndexSection(IndexSection is)
           {
             if (fd->isLinkableInProject())
             {
+              if (Config_getBool(COCOR_REDUCE_FILE_DOC)) 
+              {
+                QCString fileName = fd->name().lower();
+                if (fileName.findRev(".atg") != (int)fileName.length() - 4) {
+                  continue;
+                }
+              }
+
               if (isFirst)
               {
                 m_t << "}\n"; // end doxysection or chapter title
@@ -1240,6 +1249,13 @@ void LatexGenerator::endIndexSection(IndexSection is)
             }
             if (fd->generateSourceFile())
             {
+              if (Config_getBool(COCOR_REDUCE_FILE_DOC)) 
+              {
+                QCString fileName = fd->name().lower();
+                if (fileName.findRev(".atg") != (int)fileName.length() - 4) {
+                  continue;
+                }
+              }
               if (isFirst)
               {
                 m_t << "}\n"; // end doxysection or chapter title
@@ -2024,12 +2040,13 @@ void LatexGenerator::endExamples()
   m_t << "\\end{Desc}\n";
 }
 
-void LatexGenerator::startParameterList(bool openBracket)
+void LatexGenerator::startParameterList(bool openBracket, char bracket)
 {
   /* start of ParameterType ParameterName list */
-  if (openBracket) m_t << "(";
+  if (openBracket) m_t << bracket;
   m_t << "\\begin{DoxyParamCaption}";
 }
+
 
 void LatexGenerator::endParameterList()
 {
@@ -2061,13 +2078,13 @@ void LatexGenerator::startParameterExtra()
   m_t << "{";
 }
 
-void LatexGenerator::endParameterExtra(bool last,bool /*emptyList*/,bool closeBracket)
+void LatexGenerator::endParameterExtra(bool last,bool /*emptyList*/,bool closeBracket, char bracket)
 {
   m_t << "}";
   if (last)
   {
     m_t << "\\end{DoxyParamCaption}";
-    if (closeBracket) m_t << ")";
+    if (closeBracket) m_t << bracket;
   }
 }
 

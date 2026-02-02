@@ -165,6 +165,13 @@ std::pair<int,int> MemberList::countDecMembers(const ClassDef *inheritedFrom) co
                                      break;
         case MemberType::Friend:     numDecMembers++;
                                      break;
+        case MemberType::Declaration:       // fall through
+        case MemberType::GrammarCharacter:  // fall through
+        case MemberType::GrammarToken:      // fall through
+        case MemberType::GrammarPragma:     // fall through
+        case MemberType::GrammarProduction:
+          numDecMembers++;
+          break;
         default:
           err("Unknown member type found for member '{}'!\n",md->name());
       }
@@ -285,7 +292,12 @@ bool MemberList::declVisible() const
         case MemberType::Service:    // fall through
         case MemberType::Sequence:   // fall through
         case MemberType::Dictionary: // fall through
-        case MemberType::Event:
+        case MemberType::Event:      // fall through
+        case MemberType::Declaration:      // fall through
+        case MemberType::GrammarCharacter: // fall through
+        case MemberType::GrammarToken:     // fall through
+        case MemberType::GrammarPragma:    // fall through
+        case MemberType::GrammarProduction:// fall through
           return TRUE;
         case MemberType::Enumeration:
           {
@@ -358,7 +370,11 @@ void MemberList::writePlainDeclarations(OutputList &ol, bool inGroup,
         case MemberType::Service:     // fall through
         case MemberType::Sequence:    // fall through
         case MemberType::Dictionary:  // fall through
-        case MemberType::Event:
+        case MemberType::Event:       // fall through
+        case MemberType::GrammarCharacter: // fall through
+        case MemberType::GrammarToken:     // fall through
+        case MemberType::GrammarPragma:    // fall through
+        case MemberType::GrammarProduction:// fall through
           {
             if (first) ol.startMemberList(),first=FALSE;
             md->writeDeclaration(ol,cd,nd,fd,gd,mod,inGroup,indentLevel,inheritedFrom,inheritId);
@@ -649,6 +665,108 @@ void MemberList::writeDocumentation(OutputList &ol,
     ol.endGroupHeader(showInline ? 2 : 0);
   }
   ol.startMemberDocList();
+
+  if (m_listType.isDocDeclarationMembers()) {
+    DocOptions opts;
+    opts.setMarkdownSupport(Config_getBool(MARKDOWN_SUPPORT));
+
+    for (const auto &md : m_members) {
+      if (!md->anchor().isEmpty()) ol.writeAnchor(md->getOutputFileBase(), md->anchor());
+      ol.generateDoc(
+                        md->docFile(),
+                        md->docLine(),
+                        container,
+                        md,
+                        md->documentation(),
+                        opts
+                    );
+    }
+
+    ol.endMemberDocList();
+    return;
+  }
+  
+  const bool isGrammarTokenList =
+      (m_listType.isDocGrammarTokenMembers()) |
+      (m_listType.isDocGrammarCharacterMembers());
+
+  if (isGrammarTokenList) {
+    const bool isFileScope = (container && container->definitionType()==Definition::TypeFile);
+    const bool inGroup     = (container && container->definitionType()==Definition::TypeGroup);
+
+    std::vector<const MemberDef*> withDoc;
+    std::vector<const MemberDef*> withoutDoc;
+
+    // split tokens into "with documentation" and "without documentation"
+    for (const auto &md : m_members) {
+      if (!md->isDetailedSectionVisible(m_container)) continue;
+      if (md->isEnumValue() && !showInline) continue;
+
+
+      QCString doc = md->documentation();
+      int endPos   = doc.find("\\endcode");
+      QCString after = (endPos == -1) ? doc : doc.mid(endPos + 8);
+      bool hasDocs = !after.stripWhiteSpace().isEmpty();
+    
+      if (hasDocs) {
+        withDoc.push_back(md);     // tokens with documentation
+      } else {
+        withoutDoc.push_back(md);  // tokens without documentation
+      }
+     
+    }
+
+    if (withDoc.empty() && withoutDoc.empty()) {
+      // nothing to do
+      ol.endMemberDocList();
+      return;
+    }
+
+    // Documented tokens: creates a section each as originally intended
+    for (const auto &md : withDoc) {
+      auto *mdm = toMemberDefMutable(const_cast<MemberDef*>(md));
+      if (!mdm) continue;
+
+      // we don't expect overloads for tokens, so 1/1
+      mdm->writeDocumentation(this, /*overloadIndex*/1, /*overloadTotal*/1,
+                            ol, scopeName, container,
+                            inGroup, showEnumValues, showInline);
+    }
+
+    // Undocumented tokens: one compact list under a single heading
+    if (!withoutDoc.empty()) {
+      ol.startGroupHeader();
+      ol.parseText(m_listType.isDocGrammarTokenMembers() ? "Further TOKENS" : "Further CHARACTERS");
+      ol.endGroupHeader(0);
+
+      DocOptions opts;
+      opts.setMarkdownSupport(Config_getBool(MARKDOWN_SUPPORT));
+
+      for (const auto &md : withoutDoc)
+      {
+          if (!md->anchor().isEmpty())
+              ol.writeAnchor(md->getOutputFileBase(), md->anchor());
+          ol.generateDoc(
+                            md->docFile(),
+                            md->docLine(),
+                            container,
+                            md,
+                            md->documentation() + "\n",
+                            opts
+                        );
+
+      }
+    }
+
+    // Member groups (if any)
+    for (const auto &mg : m_memberGroupRefList)
+    {
+      mg->writeDocumentation(ol,scopeName,container,showEnumValues,showInline);
+    }
+
+    ol.endMemberDocList();
+    return; 
+  }
 
   struct OverloadInfo
   {

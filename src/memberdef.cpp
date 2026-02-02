@@ -115,6 +115,11 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
     bool isDictionary() const override;
     bool isFunction() const override;
     bool isFunctionPtr() const override;
+    bool isDeclaration() const override;
+    bool isGrammarCharacter() const override;
+    bool isGrammarToken() const override;
+    bool isGrammarPragma() const override;
+    bool isGrammarProduction() const override;
     bool isDefine() const override;
     bool isFriend() const override;
     bool isDCOP() const override;
@@ -226,6 +231,7 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
     MemberDef *fromAnonymousMember() const override;
     bool hasCallGraph() const override;
     bool hasCallerGraph() const override;
+    bool hasUsageList() const;
     bool hasReferencesRelation() const override;
     bool hasReferencedByRelation() const override;
     bool hasEnumValues() const override;
@@ -306,6 +312,7 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
     void setFromAnonymousMember(MemberDef *m) override;
     void overrideCallGraph(bool e) override;
     void overrideCallerGraph(bool e) override;
+    void overrideUsageList(bool e) override;
     void overrideReferencedByRelation(bool e) override;
     void overrideReferencesRelation(bool e) override;
     void overrideEnumValues(bool e) override;
@@ -411,6 +418,7 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
     MemberDef  *m_memDef = nullptr;       // member definition for this declaration
     MemberDef  *m_memDec = nullptr;       // member declaration for this definition
     ClassDef   *m_relatedAlso = nullptr;  // points to class marked by relatedAlso
+    bool m_hasUsageList;
 
     ExampleList m_examples;     // a dictionary of all examples for quick access
 
@@ -655,6 +663,16 @@ class MemberDefAliasImpl : public DefinitionAliasMixin<MemberDef>
     { return getMdAlias()->isFunction(); }
     bool isFunctionPtr() const override
     { return getMdAlias()->isFunctionPtr(); }
+    bool isDeclaration() const override
+    { return getMdAlias()->isDeclaration(); }
+    bool isGrammarCharacter() const override
+    { return getMdAlias()->isGrammarCharacter(); }
+    bool isGrammarToken() const override
+    { return getMdAlias()->isGrammarToken(); }
+    bool isGrammarPragma() const override
+    { return getMdAlias()->isGrammarPragma(); }
+    bool isGrammarProduction() const override
+    { return getMdAlias()->isGrammarProduction(); }
     bool isDefine() const override
     { return getMdAlias()->isDefine(); }
     bool isFriend() const override
@@ -875,6 +893,8 @@ class MemberDefAliasImpl : public DefinitionAliasMixin<MemberDef>
     { return getMdAlias()->hasCallGraph(); }
     bool hasCallerGraph() const override
     { return getMdAlias()->hasCallerGraph(); }
+    virtual bool hasUsageList() const override
+    { return getMdAlias()->hasUsageList(); }
     bool hasReferencesRelation() const override
     { return getMdAlias()->hasReferencesRelation(); }
     bool hasReferencedByRelation() const override
@@ -1070,7 +1090,12 @@ static bool writeDefArgumentList(OutputList &ol,const Definition *scope,const Me
 
   //printf("writeDefArgList(%d)\n",defArgList->count());
   ol.endMemberDocName();
-  ol.startParameterList(!md->isObjCMethod());
+
+  if (md->isGrammarProduction()) {
+      ol.startParameterList(!md->isObjCMethod(), '<');
+  } else {
+      ol.startParameterList(!md->isObjCMethod());
+  }
   //printf("===> name=%s isDefine=%d\n",qPrint(md->name()),md->isDefine());
 
   QCString cName;
@@ -1223,7 +1248,13 @@ static bool writeDefArgumentList(OutputList &ol,const Definition *scope,const Me
     ol.endParameterName();
     ol.startParameterExtra();
   }
-  ol.endParameterExtra(TRUE,defArgList.size()<2,!md->isObjCMethod());
+
+  if (md->isGrammarProduction()) {
+      ol.endParameterExtra(TRUE,defArgList.size()<2,!md->isObjCMethod(), '>');
+  } else {
+      ol.endParameterExtra(TRUE,defArgList.size()<2,!md->isObjCMethod());
+  }
+
   if (!md->extraTypeChars().isEmpty())
   {
     ol.docify(md->extraTypeChars());
@@ -1350,6 +1381,7 @@ void MemberDefImpl::init(Definition *d,
   m_hasReferencesRelation   = Config_getBool(REFERENCES_RELATION);
   m_hasEnumValues           = Config_getBool(SHOW_ENUM_VALUES);
   m_hasInlineSource         = Config_getBool(INLINE_SOURCES);
+  m_hasUsageList            = Config_getBool(USAGELIST);
   m_initLines=0;
   m_type=t;
   if (mt==MemberType::Typedef) m_type.stripPrefix("typedef ");
@@ -2489,20 +2521,24 @@ void MemberDefImpl::writeDeclaration(OutputList &ol,
   if (!argsString().isEmpty() && !isObjCMethod())
   {
     if (!isDefine() && !isTypedef()) ol.writeString(" ");
-    linkifyText(TextGeneratorOLImpl(ol), // out
-                d,                       // scope
-                getBodyDef(),            // fileScope
-                this,                    // self
-                isDefine() ?
-                   substitute(argsString(),",",", ") :
-                isTypedef() ?
-                   substitute(argsString(),")(",") (") :
-                   combineArgsAndException(argsString(),excpString()), // text
-                m_annMemb!=nullptr,      // autoBreak
-                TRUE,                    // external
-                FALSE,                   // keepSpaces
-                indentLevel
-               );
+
+    if (!isGrammarProduction()) 
+    {
+      linkifyText(TextGeneratorOLImpl(ol), // out
+                  d,                       // scope
+                  getBodyDef(),            // fileScope
+                  this,                    // self
+                  isDefine() ?
+                     substitute(argsString(),",",", ") :
+                  isTypedef() ?
+                     substitute(argsString(),")(",") (") :
+                     combineArgsAndException(argsString(),excpString()), // text
+                  m_annMemb!=nullptr,      // autoBreak
+                  TRUE,                    // external
+                  FALSE,                   // keepSpaces
+                  indentLevel
+                 );
+    }
   }
 
   // *** write bitfields
@@ -3492,6 +3528,7 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
   SrcLangExt lang = getLanguage();
   //printf("member=%s lang=%d\n",qPrint(name()),lang);
   bool optVhdl = lang==SrcLangExt::VHDL;
+  bool suppressMemberDefinition = lang == SrcLangExt::CocoR;
   QCString sep = getLanguageSpecificSeparator(lang,TRUE);
 
   QCString scopeName = scName;
@@ -3525,6 +3562,9 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
 
   QCString ldef = definition();
   QCString title = name();
+
+  if (lang == SrcLangExt::CocoR) ldef = "";
+
   //printf("member '%s' def='%s'\n",qPrint(name()),qPrint(ldef));
   if (isEnumerate())
   {
@@ -3617,18 +3657,21 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
       ol.addLabel(cfname, memAnchor);
       // search for the last anonymous compound name in the definition
 
-      ol.startMemberDocName(isObjCMethod());
-      if (reg::search(sdef,match,reAnonymous))
+      if (!suppressMemberDefinition) 
       {
-        QCString prefix = match.prefix().str();
-        QCString suffix = match.suffix().str();
-        ol.docify(prefix);
-        ol.docify(" { ... } ");
-        linkifyText(TextGeneratorOLImpl(ol),scopedContainer,getBodyDef(),this,removeAnonymousScopes(suffix));
-      }
-      else
-      {
-        linkifyText(TextGeneratorOLImpl(ol),scopedContainer,getBodyDef(),this,ldef);
+        ol.startMemberDocName(isObjCMethod());
+        if (reg::search(sdef,match,reAnonymous))
+        {
+          QCString prefix = match.prefix().str();
+          QCString suffix = match.suffix().str();
+          ol.docify(prefix);
+          ol.docify(" { ... } ");
+          linkifyText(TextGeneratorOLImpl(ol),scopedContainer,getBodyDef(),this,removeAnonymousScopes(suffix));
+        }
+        else
+        {
+          linkifyText(TextGeneratorOLImpl(ol),scopedContainer,getBodyDef(),this,ldef);
+        }
       }
     }
   }
@@ -3683,7 +3726,7 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
       }
     }
 
-    if (!sl.empty())
+    if (!sl.empty() && !suppressMemberDefinition)
     {
       ol.pushGeneratorState();
       ol.disableAll();
@@ -3695,39 +3738,42 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
       htmlEndLabelTable=TRUE;
     }
 
-    ol.startMemberDocName(isObjCMethod());
-    if (cd && cd->isObjectiveC())
+    if (!suppressMemberDefinition)
     {
-      // strip scope name
-      int ep = ldef.find("::");
-      if (ep!=-1)
+      ol.startMemberDocName(isObjCMethod());
+      if (cd && cd->isObjectiveC())
       {
-        int sp=ldef.findRev(' ',ep);
-        if (sp!=-1)
+        // strip scope name
+        int ep = ldef.find("::");
+        if (ep!=-1)
         {
-          ldef=ldef.left(sp+1)+ldef.mid(ep+2);
-        } else {
-          ldef=ldef.mid(ep+2);
+          int sp=ldef.findRev(' ',ep);
+          if (sp!=-1)
+          {
+            ldef=ldef.left(sp+1)+ldef.mid(ep+2);
+          } else {
+            ldef=ldef.mid(ep+2);
+          }
         }
+        // strip keywords
+        int dp = ldef.find(':');
+        if (dp!=-1)
+        {
+          ldef=ldef.left(dp+1);
+        }
+        int dl=static_cast<int>(ldef.length());
+        //printf("start >%s<\n",qPrint(ldef));
+        int i=dl-1;
+        while (i>=0 && (isId(ldef.at(i)) || ldef.at(i)==':')) i--;
+        while (i>=0 && isspace(static_cast<uint8_t>(ldef.at(i)))) i--;
+        if (i>0)
+        {
+          // insert branches around the type
+          ldef="("+ldef.left(i+1)+")"+ldef.mid(i+1);
+        }
+        //printf("end   >%s< i=%d\n",qPrint(ldef),i);
+        if (isStatic()) ldef.prepend("+ "); else ldef.prepend("- ");
       }
-      // strip keywords
-      int dp = ldef.find(':');
-      if (dp!=-1)
-      {
-        ldef=ldef.left(dp+1);
-      }
-      int dl=static_cast<int>(ldef.length());
-      //printf("start >%s<\n",qPrint(ldef));
-      int i=dl-1;
-      while (i>=0 && (isId(ldef.at(i)) || ldef.at(i)==':')) i--;
-      while (i>=0 && isspace(static_cast<uint8_t>(ldef.at(i)))) i--;
-      if (i>0)
-      {
-        // insert branches around the type
-        ldef="("+ldef.left(i+1)+")"+ldef.mid(i+1);
-      }
-      //printf("end   >%s< i=%d\n",qPrint(ldef),i);
-      if (isStatic()) ldef.prepend("+ "); else ldef.prepend("- ");
     }
 
     if (optVhdl)
@@ -3795,7 +3841,7 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
 
   ol.pushGeneratorState();
   ol.disable(OutputType::Html);
-  if (!sl.empty())
+  if (!sl.empty() && !suppressMemberDefinition)
   {
     ol.startLabels();
     size_t count=0;
@@ -3815,7 +3861,7 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
   }
   else
   {
-    ol.endMemberDocName();
+    if (!suppressMemberDefinition) ol.endMemberDocName();
     ol.endMemberDoc(FALSE);
   }
 
@@ -3823,7 +3869,7 @@ void MemberDefImpl::writeDocumentation(const MemberList *ml,
   ol.pushGeneratorState();
   ol.disableAll();
   ol.enable(OutputType::Html);
-  if (htmlEndLabelTable)
+  if (htmlEndLabelTable && !suppressMemberDefinition)
   {
     ol.writeString("  </td>\n");
     ol.writeString("  <td class=\"mlabels-right\">\n");
@@ -4131,6 +4177,11 @@ QCString MemberDefImpl::memberTypeName() const
     case MemberType::Service:     return "service";
     case MemberType::Sequence:    return "sequence";
     case MemberType::Dictionary:  return "dictionary";
+    case MemberType::Declaration: return "declaration";
+    case MemberType::GrammarCharacter:   return "character";
+    case MemberType::GrammarToken:       return "token";
+    case MemberType::GrammarPragma:      return "pragma";
+    case MemberType::GrammarProduction:  return "production";
     default:          return "unknown";
   }
 }
@@ -4316,7 +4367,7 @@ void MemberDefImpl::warnIfUndocumentedParams() const
   if (!Config_getBool(EXTRACT_ALL) &&
       Config_getBool(WARN_IF_UNDOCUMENTED) &&
       Config_getBool(WARN_NO_PARAMDOC) &&
-      isFunction() &&
+      (isFunction() || isGrammarProduction() ) &&
       !isDeleted() &&
       !isReference() &&
       !Doxygen::suppressDocWarnings)
@@ -4661,6 +4712,11 @@ void MemberDefImpl::writeTagFile(TextStream &tagFile,bool useQualifiedName,bool 
     case MemberType::Service:     tagFile << "service";     break;
     case MemberType::Sequence:    tagFile << "sequence";    break;
     case MemberType::Dictionary:  tagFile << "dictionary";  break;
+    case MemberType::Declaration: tagFile << "declaration";        break;
+    case MemberType::GrammarCharacter:   tagFile << "character";   break;
+    case MemberType::GrammarToken:       tagFile << "token";       break;
+    case MemberType::GrammarPragma:      tagFile << "pragma";      break;
+    case MemberType::GrammarProduction:  tagFile << "production";  break;
   }
   if (m_prot!=Protection::Public)
   {
@@ -4981,6 +5037,12 @@ void MemberDefImpl::overrideCallerGraph(bool e)
   if (e) Doxygen::parseSourcesNeeded = TRUE;
 }
 
+void MemberDefImpl::overrideUsageList(bool e)
+{
+  m_hasUsageList=e; 
+  if (e) Doxygen::parseSourcesNeeded = TRUE;
+}
+
 void MemberDefImpl::overrideReferencedByRelation(bool e)
 {
   m_hasReferencedByRelation=e;
@@ -5266,6 +5328,27 @@ bool MemberDefImpl::isFunction() const
 bool MemberDefImpl::isFunctionPtr() const
 {
   return m_mtype==MemberType::Variable && QCString(argsString()).find(")(")!=-1;
+}
+
+bool MemberDefImpl::isDeclaration() const
+{
+  return m_mtype==MemberType::Declaration;
+}
+bool MemberDefImpl::isGrammarCharacter() const
+{
+  return m_mtype==MemberType::GrammarCharacter;
+}
+bool MemberDefImpl::isGrammarToken() const
+{
+  return m_mtype==MemberType::GrammarToken;
+}
+bool MemberDefImpl::isGrammarPragma() const
+{
+  return m_mtype==MemberType::GrammarPragma;
+}
+bool MemberDefImpl::isGrammarProduction() const
+{
+  return m_mtype==MemberType::GrammarProduction;
 }
 
 bool MemberDefImpl::isDefine() const
@@ -5561,6 +5644,11 @@ bool MemberDefImpl::isCallable() const
   return isFunction() ||
          isSlot() ||
          isSignal() ||
+         isDeclaration() || 
+         isGrammarCharacter() || 
+         isGrammarToken() || 
+         isGrammarPragma() || 
+         isGrammarProduction() ||
          isConstructor() ||
          isDestructor() ||
          isObjCMethod() ||
@@ -5754,6 +5842,11 @@ bool MemberDefImpl::_hasVisibleCallerGraph() const
     return !trivial;
   }
   return FALSE;
+}
+
+bool MemberDefImpl::hasUsageList() const
+{
+  return m_hasUsageList;
 }
 
 bool MemberDefImpl::hasReferencedByRelation() const
@@ -6446,6 +6539,11 @@ CodeSymbolType MemberDefImpl::codeSymbolType() const
     case MemberType::Service:     return CodeSymbolType::Service;
     case MemberType::Sequence:    return CodeSymbolType::Sequence;
     case MemberType::Dictionary:  return CodeSymbolType::Dictionary;
+    case MemberType::Declaration:  return CodeSymbolType::Declaration;
+    case MemberType::GrammarCharacter:  return CodeSymbolType::GrammarCharacter;
+    case MemberType::GrammarToken:  return CodeSymbolType::GrammarToken;
+    case MemberType::GrammarPragma:  return CodeSymbolType::GrammarPragma;
+    case MemberType::GrammarProduction:  return CodeSymbolType::GrammarProduction;
   }
   return CodeSymbolType::Default;
 }
@@ -6472,7 +6570,7 @@ void addDocCrossReference(const MemberDef *s,const MemberDef *d)
   if (src==nullptr || dst==nullptr) return;
   //printf("--> addDocCrossReference src=%s,dst=%s\n",qPrint(src->name()),qPrint(dst->name()));
   if (dst->isTypedef() || dst->isEnumerate()) return; // don't add types
-  if ((dst->hasReferencedByRelation() || dst->hasCallerGraph()) &&
+  if ((dst->hasReferencedByRelation() || dst->hasCallerGraph() || dst->hasUsageList()) &&
       src->isCallable()
      )
   {

@@ -33,7 +33,7 @@ class LatexCodeGenerator : public OutputCodeIntf
 
     OutputType type() const override { return OutputType::Latex; }
     std::unique_ptr<OutputCodeIntf> clone() override { return std::make_unique<LatexCodeGenerator>(*this); }
-    void codify(const QCString &text) override;
+    void codify(const QCString &text, bool customEnv) override;
     void stripCodeComments(bool b) override;
     void startSpecialComment() override;
     void endSpecialComment() override;
@@ -279,10 +279,10 @@ class LatexGenerator : public OutputGenerator, public OutputGenIntf
     void startParameterName(bool) override;
     void endParameterName() override;
     void startParameterExtra() override;
-    void endParameterExtra(bool last,bool one,bool bracket) override;
+    void endParameterExtra(bool last,bool one,bool bracket, char = '(') override;
     void startParameterDefVal(const char *s) override { docify(s); startTypewriter(); }
     void endParameterDefVal() override { endTypewriter(); }
-    void startParameterList(bool) override;
+    void startParameterList(bool, char = '(') override;
     void endParameterList() override;
     void exceptionEntry(const QCString &,bool) override;
 

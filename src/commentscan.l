@@ -142,6 +142,7 @@ static bool handleCollaborationgraph(yyscan_t yyscanner,const QCString &, const 
 static bool handleHideCollaborationgraph(yyscan_t yyscanner,const QCString &, const StringVector &);
 static bool handleInheritanceGraph(yyscan_t yyscanner,const QCString &, const StringVector &);
 static bool handleHideInheritanceGraph(yyscan_t yyscanner,const QCString &, const StringVector &);
+static bool handleUsageList(yyscan_t yyscanner,const QCString &, const StringVector &);
 static bool handleReferencedByRelation(yyscan_t yyscanner,const QCString &, const StringVector &);
 static bool handleHideReferencedByRelation(yyscan_t yyscanner,const QCString &, const StringVector &);
 static bool handleReferencesRelation(yyscan_t yyscanner,const QCString &, const StringVector &);
@@ -354,6 +355,7 @@ static const std::unordered_map< std::string, DocCmdMap > docCmdMap =
   { "qualifier",              { &handleQualifier,                CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "raisewarning",           { &handleRaiseWarning,             CommandSpacing::Invisible, SectionHandling::Replace }},
   { "refitem",                { &handleRefItem,                  CommandSpacing::Inline,    SectionHandling::Escape  }},
+  { "refFrom",                { &handleUsageList,                CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "related",                { &handleRelated,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "relatedalso",            { &handleRelatedAlso,              CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "relates",                { &handleRelated,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
@@ -3937,6 +3939,14 @@ static bool handleHideCallergraph(yyscan_t yyscanner,const QCString &, const Str
 {
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
   yyextra->current->commandOverrides.override_callerGraph(false); // OFF
+  return FALSE;
+}
+
+static bool handleUsageList(yyscan_t yyscanner,const QCString &, const StringVector &)
+{
+  struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
+  addOutput(yyscanner," \\refFrom"); 
+  yyextra->current->commandOverrides.override_usageList(true); // ON
   return FALSE;
 }
 

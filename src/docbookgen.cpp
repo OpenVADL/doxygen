@@ -162,7 +162,7 @@ DocbookCodeGenerator::DocbookCodeGenerator(TextStream *t) : m_t(t)
 {
 }
 
-void DocbookCodeGenerator::codify(const QCString &text)
+void DocbookCodeGenerator::codify(const QCString &text, bool customEnv)
 {
   Docbook_DB(("(codify \"%s\")\n",text));
   writeDocbookCodeString(m_hide,*m_t,text,m_col,static_cast<size_t>(m_stripIndentAmount));
@@ -859,10 +859,10 @@ DB_GEN_C
   m_t << "</title>\n";
 }
 
-void DocbookGenerator::startParameterList(bool openBracket)
+void DocbookGenerator::startParameterList(bool openBracket, char bracket)
 {
 DB_GEN_C
-  if (openBracket) m_t << "(";
+  if (openBracket) m_t << bracket;
 }
 void DocbookGenerator::endParameterList()
 {
@@ -1097,14 +1097,15 @@ void DocbookGenerator::startParameterExtra()
 DB_GEN_C
 }
 
-void DocbookGenerator::endParameterExtra(bool last,bool /*emptyList*/,bool closeBracket)
+void DocbookGenerator::endParameterExtra(bool last,bool /*emptyList*/,bool closeBracket,char bracket)
 {
 DB_GEN_C
   if (last && closeBracket)
   {
-    m_t << ")";
+    m_t << bracket;
   }
 }
+
 
 
 void DocbookGenerator::startParameterDefVal(const char *sep)

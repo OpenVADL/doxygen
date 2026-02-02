@@ -111,6 +111,8 @@
 #include "vhdljjparser.h"
 #include "xmlcode.h"
 #include "xmlgen.h"
+#include "cocorcode.h"
+#include "cocorscanner.h"
 
 #include <sqlite3.h>
 
@@ -2154,6 +2156,7 @@ static void applyMemberOverrideOptions(const Entry *root,MemberDefMutable *md)
   root->commandOverrides.apply_referencesRelation  ([&](bool b) { md->overrideReferencesRelation(b);   });
   root->commandOverrides.apply_inlineSource        ([&](bool b) { md->overrideInlineSource(b);         });
   root->commandOverrides.apply_enumValues          ([&](bool b) { md->overrideEnumValues(b);           });
+  root->commandOverrides.apply_usageList           ([&](bool b) { md->overrideUsageList(b);            });
 }
 
 //----------------------------------------------------------------------
@@ -3688,6 +3691,60 @@ static void buildInterfaceAndServiceList(const Entry *root)
 // Searches the Entry tree for Function sections.
 // If found they are stored in their class or in the global list.
 
+
+static void addGrammarEntity(const Entry *root,const QCString &rname, MemberType mtype)
+{
+  QCString name=removeRedundantWhiteSpace(rname);
+  auto md = createMemberDef(
+      root->fileName, root->startLine, root->startColumn,
+      root->type, name, root->args, root->exception,
+      root->protection, root->virt,
+      root->isStatic,            
+      Relationship::Member,
+      mtype,
+      !root->tArgLists.empty() ? root->tArgLists.back() : ArgumentList(),
+      root->argList,
+      root->metaData);
+  auto mmd = toMemberDefMutable(md.get());
+
+  mmd->setTagInfo(root->tagInfo());
+  mmd->setLanguage(root->lang);
+  mmd->setId(root->id);
+  mmd->setDocumentation(root->doc,root->docFile,root->docLine);
+  mmd->setBriefDescription(root->brief,root->briefFile,root->briefLine);
+  mmd->setInbodyDocumentation(root->inbodyDocs,root->inbodyFile,root->inbodyLine);
+  mmd->setPrototype(root->proto,root->fileName,root->startLine,root->startColumn);
+  mmd->setDocsForDefinition(!root->proto);
+  mmd->setTypeConstraints(root->typeConstr);
+  mmd->setBodySegment(root->startLine,root->bodyLine,root->endBodyLine);
+
+  FileDef *fd=root->fileDef();
+  mmd->setBodyDef(fd);
+  mmd->addSectionsToDefinition(root->anchors);
+  mmd->setMemberSpecifiers(root->spec);
+  mmd->setMemberGroupId(root->mGrpId);
+
+  QCString def;
+  if (!root->type.isEmpty()) {
+    def = root->type + " " + name;
+  } else {
+    def = name;
+  }
+  
+  mmd->setDefinition(def);
+
+  mmd->setRefItems(root->sli);
+  if (fd) {
+    mmd->setFileDef(fd);
+    fd->insertMember(md.get());
+  }
+
+  // add member to the list of file members
+  MemberName *mn = Doxygen::functionNameLinkedMap->add(name);
+  mn->push_back(std::move(md));
+}
+
+
 static void addMethodToClass(const Entry *root,ClassDefMutable *cd,
                   const QCString &rtype,const QCString &rname,const QCString &rargs,
                   bool isFriend,
@@ -3929,6 +3986,119 @@ static void addGlobalFunction(const Entry *root,const QCString &rname,const QCSt
   // add member to the list of file members
   MemberName *mn = Doxygen::functionNameLinkedMap->add(name);
   mn->push_back(std::move(md));
+}
+
+//------------------------------------------------------------------------------------------
+
+static void buildDeclarationList(const Entry *root)
+{
+  if (root->section.isDeclaration())
+  {
+    QCString rname = removeRedundantWhiteSpace(root->name);
+
+    if (!rname.isEmpty())
+    {
+      addGrammarEntity(root,rname, MemberType::Declaration);
+    }
+    else
+    {
+        warn(root->fileName,root->startLine,
+             "Illegal member name found."
+             );
+    }
+  }
+  for (const auto &e : root->children()) buildDeclarationList(e.get());
+}
+
+//------------------------------------------------------------------------------------------
+
+static void buildCharacterList(const Entry *root)
+{
+  if (root->section.isGrammarCharacter())
+  {
+    QCString rname = removeRedundantWhiteSpace(root->name);
+
+    if (!rname.isEmpty())
+    {
+      addGrammarEntity(root,rname, MemberType::GrammarCharacter);
+    }
+    else
+    {
+        warn(root->fileName,root->startLine,
+             "Illegal member name found."
+             );
+    }
+  }
+  for (const auto &e : root->children()) buildCharacterList(e.get());
+}
+
+
+//------------------------------------------------------------------------------------------
+
+static void buildTokenList(const Entry *root)
+{
+  if (root->section.isGrammarToken())
+  {
+    QCString rname = removeRedundantWhiteSpace(root->name);
+
+    if (!rname.isEmpty())
+    {
+      addGrammarEntity(root,rname, MemberType::GrammarToken);
+    }
+    else
+    {
+        warn(root->fileName,root->startLine,
+             "Illegal member name found."
+             );
+    }
+  }
+  for (const auto &e : root->children()) buildTokenList(e.get());
+}
+
+
+//------------------------------------------------------------------------------------------
+
+static void buildPragmaList(const Entry *root)
+{
+  if (root->section.isGrammarPragma())
+  {
+    QCString rname = removeRedundantWhiteSpace(root->name);
+
+    if (!rname.isEmpty())
+    {
+      addGrammarEntity(root,rname, MemberType::GrammarPragma);
+    }
+    else
+    {
+        warn(root->fileName,root->startLine,
+             "Illegal member name found."
+             );
+    }
+  }
+  for (const auto &e : root->children()) buildPragmaList(e.get());
+}
+
+
+//------------------------------------------------------------------------------------------
+
+static void buildProductionList(const Entry *root)
+{
+  if (root->section.isGrammarProduction())
+  {
+    QCString rname = removeRedundantWhiteSpace(root->name);
+
+    if (!rname.isEmpty())
+    {
+      addGrammarEntity(root,rname, MemberType::GrammarProduction);
+    }
+    else
+    {
+        warn(root->fileName,root->startLine,
+             "Illegal member name found."
+             );
+    }
+  }
+  for (const auto &e : root->children()) buildProductionList(e.get());
 }
 
 //------------------------------------------------------------------------------------------
@@ -7506,7 +7676,12 @@ static void findMemberDocumentation(const Entry *root)
       root->section.isVariableDoc() ||
       root->section.isDefine() ||
       root->section.isIncludedService() ||
-      root->section.isExportedInterface()
+      root->section.isExportedInterface() ||
+      root->section.isDeclaration() ||
+      root->section.isGrammarCharacter() ||
+      root->section.isGrammarToken() ||
+      root->section.isGrammarPragma() ||
+      root->section.isGrammarProduction()
      )
   {
     AUTO_TRACE();
@@ -7832,7 +8007,7 @@ static void addEnumValuesToEnums(const Entry *root)
             for (const auto &e : root->children())
             {
               SrcLangExt sle = root->lang;
-              bool isJavaLike = sle==SrcLangExt::CSharp || sle==SrcLangExt::Java || sle==SrcLangExt::XML;
+              bool isJavaLike = sle==SrcLangExt::CSharp || sle==SrcLangExt::Java || sle==SrcLangExt::XML || sle==SrcLangExt::CocoR;
               if ( isJavaLike || root->spec.isStrong())
               {
                 if (sle == SrcLangExt::Cpp && e->section.isDefine()) continue;
@@ -8742,6 +8917,9 @@ static void generateFileSources()
             StringVector filesInSameTu;
             fd->getAllIncludeFilesRecursively(filesInSameTu);
             processSourceFile(fd.get(),*g_outputList,nullptr);
+
+            // SrcLangExt lang = getLanguageFromFileName(pd->name(), SrcLangExt::Unknown);
+            fd->parseSource(nullptr);
           }
         }
       }
@@ -11455,6 +11633,9 @@ void initDoxygen()
                                                          make_parser_factory<FileCodeParser>());
   Doxygen::parserManager->registerParser("lex",          make_parser_factory<LexOutlineParser>(),
                                                          make_parser_factory<LexCodeParser>());
+  Doxygen::parserManager->registerParser("cocor",        make_parser_factory<CocoROutlineParser>(),
+                                                         make_parser_factory<CocoRCodeParser>());
+
 
   // register any additional parsers here...
 
@@ -12002,7 +12183,8 @@ void adjustConfiguration()
   Doxygen::parseSourcesNeeded = Config_getBool(CALL_GRAPH) ||
                                 Config_getBool(CALLER_GRAPH) ||
                                 Config_getBool(REFERENCES_RELATION) ||
-                                Config_getBool(REFERENCED_BY_RELATION);
+                                Config_getBool(REFERENCED_BY_RELATION) ||
+                                Config_getBool(USAGELIST);
 
   /**************************************************************************
    *            Add custom extension mappings
@@ -12882,6 +13064,26 @@ void parseInput()
 
   g_s.begin("Building member list...\n"); // using class info only !
   buildFunctionList(root.get());
+  g_s.end();
+
+  g_s.begin("Building grammar declaration list...\n");
+  buildDeclarationList(root.get());
+  g_s.end();
+
+  g_s.begin("Building grammar character list...\n");
+  buildCharacterList(root.get());
+  g_s.end();
+
+  g_s.begin("Building grammar token list...\n");
+  buildTokenList(root.get());
+  g_s.end();
+
+  g_s.begin("Building grammar pragma list...\n");
+  buildPragmaList(root.get());
+  g_s.end();
+
+  g_s.begin("Building grammar production list...\n");
+  buildProductionList(root.get());
   g_s.end();
 
   g_s.begin("Searching for friends...\n");
