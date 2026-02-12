@@ -18,7 +18,7 @@ permissions:
 jobs:
   build-and-push:
     name: Build and Push Docker Image
-    runs-on: self-hosted-x64
+    runs-on: self-hosted-arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
