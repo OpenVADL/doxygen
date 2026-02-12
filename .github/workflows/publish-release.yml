@@ -1,0 +1,119 @@
+name: Publish Doxygen Release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and publish (e.g. 1.16.1)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-x64:
+    name: Build Linux x64
+    runs-on: self-hosted-x64
+    outputs:
+      release_tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+      - name: Resolve release tag
+        id: release
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Set Doxygen version from tag
+        run: echo "${{ steps.release.outputs.tag }}" > VERSION
+
+      - name: Configure
+        run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j"$(nproc)"
+
+      - name: Package binary
+        run: |
+          mkdir -p dist
+          tar -C build/bin -czf "dist/doxygen-${{ steps.release.outputs.tag }}-linux-x64.tar.gz" doxygen
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-linux-x64
+          path: dist/doxygen-${{ steps.release.outputs.tag }}-linux-x64.tar.gz
+          if-no-files-found: error
+
+  build-macos-arm64:
+    name: Build macOS arm64
+    runs-on: self-hosted-arm64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+      - name: Resolve release tag
+        id: release
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Set Doxygen version from tag
+        run: echo "${{ steps.release.outputs.tag }}" > VERSION
+
+      - name: Configure
+        run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j"$(sysctl -n hw.ncpu)"
+
+      - name: Package binary
+        run: |
+          mkdir -p dist
+          tar -C build/bin -czf "dist/doxygen-${{ steps.release.outputs.tag }}-macos-arm64.tar.gz" doxygen
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-macos-arm64
+          path: dist/doxygen-${{ steps.release.outputs.tag }}-macos-arm64.tar.gz
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs:
+      - build-linux-x64
+      - build-macos-arm64
+    runs-on: self-hosted-x64
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
+          tag_name: ${{ needs.build-linux-x64.outputs.release_tag }}
+          generate_release_notes: true
+          overwrite_files: true
