@@ -10,6 +10,7 @@ It intentionally diverges from upstream and is **not intended to be merged back*
 
 ## Building
 
+### Linux/Unix
 For Linux/Unix systems do the following:
 ```
 mkdir build
@@ -19,11 +20,20 @@ make
 ```
 Note: `path/to/root/of/doxygen/source/tree` is not the `src` directory but its parent.
 
+### MacOS
 This also works for MacOS, but if XCode is installed you can also generate an XCode project file
 ```
-cmake -G XCode path/to/root/of/doxygen/source/tree
+cmake -G Xcode path/to/root/of/doxygen/source/tree
 ```
+or more specifically
+```
+mkdir build
+cd build
+cmake -G Xcode ../
+```
+If you have the issue that the homebrew installed bison was not used, use the Linux/Unix build method instead.
 
+### Windows
 For Windows one can generate a Visual Studio project using
 ```
 cmake -G "Visual Studio 12 2013" path\to\root\of\doxygen\source\tree
