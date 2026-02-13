@@ -8,6 +8,29 @@ It intentionally diverges from upstream and is **not intended to be merged back*
 
 ---
 
+## Building
+
+For Linux/Unix systems do the following:
+```
+mkdir build
+cd build
+cmake -G "Unix Makefiles" path/to/root/of/doxygen/source/tree
+make
+```
+Note: `path/to/root/of/doxygen/source/tree` is not the `src` directory but its parent.
+
+This also works for MacOS, but if XCode is installed you can also generate an XCode project file
+```
+cmake -G XCode path/to/root/of/doxygen/source/tree
+```
+
+For Windows one can generate a Visual Studio project using
+```
+cmake -G "Visual Studio 12 2013" path\to\root\of\doxygen\source\tree
+```
+(this is for Visual Studio 12, there are typically also generators for other versions of
+Visual Studio or other compiler environments like MinGW)
+
 ## Branching Model
 
 ### `master`
