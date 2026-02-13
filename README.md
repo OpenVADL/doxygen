@@ -8,6 +8,32 @@ It intentionally diverges from upstream and is **not intended to be merged back*
 
 ---
 
+## Usage
+
+Without building the sources, the easiest way to use this doxygen version is via docker:
+```
+docker run --rm -v ./:/doxygen ghcr.io/openvadl/doxygen:latest --version
+```
+You can place it in a bash script like
+```
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION=latest
+IMAGE=ghcr.io/openvadl/doxygen:$VERSION
+
+docker run --rm \
+  -u $(id -u):$(id -g) \
+  --group-add $(id -g) \
+  -v "$PWD":/work \
+  -w /work \
+  "$IMAGE" "$@"
+```
+and call it as a normal doxygen executable
+```
+my-doxygen.sh --version
+```
+
 ## Building
 
 ### Linux/Unix
