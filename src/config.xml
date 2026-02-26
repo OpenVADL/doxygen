@@ -1689,6 +1689,8 @@ PATH=/Library/TeX/texbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
       <value name='*.ucf'/>
       <value name='*.qsf'/>
       <value name='*.ice'/>
+      <value name='*.atg'/>
+      <value name='*.ATG'/>
     </option>
     <option type='bool' id='RECURSIVE' defval='0'>
       <docs>
