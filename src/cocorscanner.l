@@ -1672,7 +1672,7 @@ static void parseMain(yyscan_t yyscanner,
   yyextra->yyFileName = fileName;
   yyextra->language    = getLanguageFromFileName(yyextra->yyFileName);
   rt->lang = yyextra->language;
-  msg("Parsing file %s...\n", yyextra->yyFileName.data());
+  msg("Parsing file %s...\n", yyextra->yyFileName);
 
   yyextra->current_root  = rt;
   yyextra->commentScanner.enterFile(yyextra->yyFileName, yyextra->yyLineNr);

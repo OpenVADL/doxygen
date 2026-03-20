@@ -749,10 +749,10 @@ static bool getLinkInScope(yyscan_t yyscanner,
 
   if (yyextra->currentDefinition && yyextra->currentMemberDef && yyextra->collectXRefs)
   {
-    fprintf(stderr, "\nReference added: from-%s to-%s\n\n", 
-    yyextra->currentMemberDef->name().data(),
-    md->name().data()
-    );
+    //fprintf(stderr, "\nReference added: from-%s to-%s\n\n", 
+    //yyextra->currentMemberDef->name().data(),
+    //md->name().data()
+    //);
     addDocCrossReference(yyextra->currentMemberDef, md);
   }
 
